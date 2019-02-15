@@ -1,0 +1,5 @@
+PROGRAM secant
+  IMPLICIT NONE
+  REAL :: guess, p, f,
+  
+END PROGRAM secant
