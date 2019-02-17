@@ -1,0 +1,11 @@
+{
+    "version": "0.1.0",
+    "name": "buildTask",
+    "command": "gfortran",
+    "isShellCommand": true,
+    // this is neccesary when called from the debug task
+    "cwd": "${workspaceRoot}",   
+     "args": [
+                "-o", "foo", "-g","-O0", "main.f90"
+            ]
+}

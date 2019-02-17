@@ -1,0 +1,34 @@
+PROGRAM first_partial
+  IMPLICIT NONE
+  DOUBLE PRECISION :: a,b,c,f
+  REAL :: tol, iters, start
+  LOGICAL:: interval
+  interval = .FALSE.
+  
+END PROGRAM first_partial
+
+SUBROUTINE bisection(a,b,c,f,tol,iters,start,interval)
+  DOUBLE PRECISION :: a,b,c,f
+  REAL :: tol, iters, start
+  LOGICAL:: interval
+  
+  DO WHILE (interval .EQV. .FALSE.)
+     write(*,*) f(a)
+     write(*,*) f(b)
+     if((f(a)*f(b)) .LT. 0) then
+        print *,"Perfecto!"
+        interval = .TRUE.
+     else
+        print *,"No hay intervalo, intentalo otra vez"
+        print *, "------------------------------------"
+        CALL intervalos(a,b)
+     end if
+  END DO
+
+  print *,"Ingresa la tolerancia:"
+  read (*,*) tol
+  print *, "Ingresa el numero de iteraciones"
+  read (*,*) iters
+
+  
+END SUBROUTINE bisection
