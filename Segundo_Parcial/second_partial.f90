@@ -68,11 +68,13 @@ SUBROUTINE gauss_elimination()
 		results(i) = (matrix(i,n_1) - temps)/matrix(i,i)
 	enddo
 
-
+	!********** EXPORT TO CSV **********!
 	open (unit = 2, file = "results.csv")
 	write(2,*)"Xsub",(",",j,j=1,n)
 	write(2,*)"-", (",",results(i), i=1,n)
 	close(2)
+	!********** EXPORT TO CSV **********!
+
 	!********** BACKWARDS SUBSTITUTION **********!
 
 END SUBROUTINE gauss_elimination
