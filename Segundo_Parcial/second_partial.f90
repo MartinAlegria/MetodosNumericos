@@ -15,7 +15,7 @@ SUBROUTINE gauss_elimination()
 	DOUBLE PRECISION, dimension (:,:), allocatable :: matrix
 	DOUBLE PRECISION, dimension (:,:), allocatable :: calcs
 	DOUBLE PRECISION, dimension (:), allocatable :: results
-	DOUBLE PRECISION, dimension (:), allocatable :: temps
+	DOUBLE PRECISION :: temps
 
 	open(unit = 10, file = "test.txt")
 	read(10,*)n
@@ -23,8 +23,7 @@ SUBROUTINE gauss_elimination()
 	n_1 = n+1
 	allocate ( matrix(n,n_1) )
 	allocate ( calcs(n,n_1) )
-	allocate ( results(n) )   
-	allocate ( temps(n) )  
+	allocate ( results(n) )    
 	do i=1,n
 		read(10,*)matrix(i,:)
 		write(*,*)matrix(i,:)
@@ -59,12 +58,21 @@ SUBROUTINE gauss_elimination()
 	!********** TURN MATRIX INTO LOWER TRIANGLE MATRIX **********!
 
 	!********** BACKWARDS SUBSTITUTION **********!
-	temps(n) = temps(n) + (matrix(n,n_1)/matrix(n,n)) !--- Get Xsub1 first
-	write(*,*) "Xsub1 = ", temps(n)
-	do i=n,1, -1
+	results(n) = (matrix(n,n_1)/matrix(n,n))!--- Get Xsub1 first
 
-	
+	do i=n-1, 1, -1
+		temps = 0
+		do j=i+1, n
+			temps = temps + matrix(i,j)*results(j)
+		enddo
+		results(i) = (matrix(i,n_1) - temps)/matrix(i,i)
 	enddo
+
+
+	open (unit = 2, file = "results.csv")
+	write(2,*)"Xsub",(",",j,j=1,n)
+	write(2,*)"-", (",",results(i), i=1,n)
+	close(2)
 	!********** BACKWARDS SUBSTITUTION **********!
 
 END SUBROUTINE gauss_elimination
