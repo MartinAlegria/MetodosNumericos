@@ -1,10 +1,10 @@
 PROGRAM SECOND_PARTIAL
 
 	IMPLICIT NONE
-	CALL gauss_elimination()
+	!CALL gauss_elimination()
 	!CALL lu_decomp()
-	CALL gauss_seidel()
-
+	!CALL gauss_seidel()
+	CALL lagrange()
 
 END PROGRAM SECOND_PARTIAL
 
@@ -253,6 +253,46 @@ SUBROUTINE power_series()
 END SUBROUTINE power_series
 
 SUBROUTINE lagrange()
+	!********** READ FILE **********!
+	INTEGER :: n, n_1,i,j,k,l 
+	DOUBLE PRECISION, dimension (:), allocatable :: y
+	DOUBLE PRECISION, dimension (:), allocatable :: x
+	DOUBLE PRECISION, dimension (:), allocatable :: poly
+	DOUBLE PRECISION :: up, down,r, res
+
+	r = 2
+
+	open(unit = 10, file = "interpolation.txt")
+	read(10,*)n
+	allocate ( y(n) )
+	allocate ( x(n) )
+	allocate ( poly(n) )
+
+	write(*,*) "************* Read Matrix *************"   
+	do i=1,n
+		read(10,*)x(i),y(i)
+		write(*,*)x(i),y(i)
+	enddo
+
+	
+	do i=1, n
+		up = 1
+		down = 1
+		do j=1, n
+			if(j /= i) then
+				up = up*(r-x(j))
+				down = down*(x(i)-x(j))
+			end if
+		end do!DO DEL J
+		poly(i) = up/down
+	end do
+ 
+	close(10)
+
+	res = dot_product(poly(:),y(:))	
+	write(*,*) "######## ANSWER", res  
+	!********** READ FILE **********!	
+
 END SUBROUTINE lagrange
 
 SUBROUTINE newton()
