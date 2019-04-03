@@ -5,7 +5,7 @@ PROGRAM SECOND_PARTIAL
 	!CALL lu_decomp()
 	!CALL gauss_seidel()
 	!CALL lagrange()
-	CALL newton()
+	!CALL newton()
 
 END PROGRAM SECOND_PARTIAL
 
@@ -72,6 +72,7 @@ SUBROUTINE gauss_elimination()
 	enddo
 
 	!********** EXPORT TO CSV **********!
+	write(*,*) "************* RESULTS EXPORTED TO CSV ************* "
 	open (unit = 2, file = "gauss_elimination.csv")
 	write(2,*)"Xsub",(",",j,j=1,n)
 	write(2,*)"-", (",",results(i), i=1,n)
@@ -174,6 +175,7 @@ SUBROUTINE lu_decomp()
 
 	!********** EXPORT TO CSV **********!
 	open (unit = 2, file = "lu_decomp.csv")
+	write(*,*) "************* RESULTS EXPORTED TO CSV ************* "
 	write(2,*)"Xsub",(",",j,j=1,n)
 	write(2,*)"-", (",",x(i), i=1,n)
 	close(2)
@@ -188,7 +190,7 @@ SUBROUTINE gauss_seidel()
 	DOUBLE PRECISION, dimension (:), allocatable :: x
 	DOUBLE PRECISION, dimension (:), allocatable :: past_x
 	DOUBLE PRECISION, dimension (:), allocatable :: b
-	DOUBLE PRECISION :: temps, sum, error
+	DOUBLE PRECISION :: temps, sum, error,tol
 
 	open(unit = 10, file = "test.txt")
 	read(10,*)n
@@ -205,15 +207,18 @@ SUBROUTINE gauss_seidel()
 
 	x(:) = 0
 
+	close(10)
+
+	write(*,*) "Enter your tolerance"
+	read(*,*)tol
+
 	do
 
 	!********** EVALUATE EQUATIONS **********!
 	do i=1,n
-		write(*,*) "************* for 1 *************" 
 		temps = 0
 		past_x = x
 		do j=1,n
-			write(*,*) "************* for 2 *************" 
 			if (j /= i) then
 				temps = temps + matrix(i,j)*x(j)
 			endif
@@ -223,7 +228,6 @@ SUBROUTINE gauss_seidel()
 
 	!********** EVALUATE EQUATIONS **********!
 
-	write(*,*) x(:)
 
 	!********** CALCULATE AND COMPARE ERRORS **********!
 	sum = 0
@@ -232,9 +236,7 @@ SUBROUTINE gauss_seidel()
 		sum = sum + error
 	enddo
 
-	write(*,*) sum
-
-	if (abs(sum)<= 0.0001) then
+	if (abs(sum)<= tol) then
 		EXIT
 	endif
 
@@ -242,9 +244,13 @@ SUBROUTINE gauss_seidel()
 
  	end do
 
- 	write(*,*) "@@@@ FINAL -------", x(:)
-
-	close(10)
+ 	!********** EXPORT TO CSV **********!
+	open (unit = 2, file = "gauss_seidel.csv")
+	write(*,*) "************* RESULTS EXPORTED TO CSV ************* "
+	write(2,*)"Xsub",(",",j,j=1,n)
+	write(2,*)"-", (",",x(i), i=1,n)
+	close(2)
+	!********** EXPORT TO CSV **********!
 	!********** READ FILE **********!		!####### DONE -------------->
 END SUBROUTINE gauss_seidel
 
@@ -261,19 +267,19 @@ SUBROUTINE lagrange()
 	DOUBLE PRECISION, dimension (:), allocatable :: poly
 	DOUBLE PRECISION :: up, down,r, res
 
-	r = 2
-
 	open(unit = 10, file = "interpolation.txt")
-	read(10,*)n
+	read(10,*)n,r
 	allocate ( y(n) )
 	allocate ( x(n) )
 	allocate ( poly(n) )
 
-	write(*,*) "************* Read Matrix *************"   
+	write(*,*) "************* Read Data *************"   
 	do i=1,n
 		read(10,*)x(i),y(i)
 		write(*,*)x(i),y(i)
 	enddo
+
+	write(*,*) "************* Number to interpolate: ", r	
 
 	close(10)
 
@@ -292,7 +298,15 @@ SUBROUTINE lagrange()
 	
 
 	res = dot_product(poly(:),y(:))	
-	write(*,*) "######## ANSWER", res  
+	write(*,*) "************* RESULTS EXPORTED TO CSV ************* "
+
+	!********** EXPORT TO CSV **********!
+	open (unit = 2, file = "lagrange.csv")
+	write(2,*) "RESPUESTA:"
+	write(2,*) res
+	close(2)
+	!********** EXPORT TO CSV **********!
+
 	!********** READ FILE **********!				!####### DONE -------------->
 END SUBROUTINE lagrange
 
@@ -303,34 +317,56 @@ SUBROUTINE newton()
 	DOUBLE PRECISION, dimension (:), allocatable :: y
 	DOUBLE PRECISION, dimension (:), allocatable :: x
 	DOUBLE PRECISION, dimension (:,:), allocatable :: diff
-	DOUBLE PRECISION :: temp
-
-	r = 2
+	DOUBLE PRECISION :: temp, fin,r
 
 	open(unit = 10, file = "interpolation.txt")
-	read(10,*)n
+	read(10,*)n,r
 	n_1 = n-1
 	allocate ( y(n) )
 	allocate ( x(n) )
-	allocate ( diff(n_1,n_1) )
+	allocate ( diff(n,n) )
 
-
-	write(*,*) "************* Read Matrix *************"   
+	write(*,*) "************* Read Data *************"   
 	do i=1,n
 		read(10,*)x(i),y(i)
 		write(*,*)x(i),y(i)
 	enddo
+	write(*,*) "************* Number to interpolate: ", r
 
 	close(10)
 
-	do j=1,n-1
-		!write(*,*) y(j+1), y(j) , x(j+1), x(j)
-		diff(1,j) = (y(j+1) - y(j))/(x(j+1) - x(j))
+	diff(:,1) = y(:)
+
+	do j = 2,n
+		do i=1, (n-j+1)
+			diff(i,j) = (diff(i + 1, j - 1) - diff(i, j - 1)) / (x(i + j - 1) - x(i));
+		enddo
 	enddo
 
 
+	temp = 1
+	fin = 0
 
-	write(*,*) diff(1,:)
+	do i=2,n
+		do j=1,i-1
+			temp = temp*(r-x(j))
+		enddo
+		fin = fin + temp*diff(1,i)
+	enddo
+
+	fin = fin + y(1)
+	write(*,*) "************* RESULTS EXPORTED TO CSV ************* "
+
+	!********** EXPORT TO CSV **********!
+	open (unit = 2, file = "newton_div_diff.csv")
+	write(2,*)"DIVIDED DIFFERENCES"
+	do i=1, n
+		write(2,*) ( diff(i,j),"," ,j=2,n)
+	enddo
+	write(2,*) "RESPUESTA:"
+	write(2,*) fin
+	close(2)
+	!********** EXPORT TO CSV **********!
 
 
 END SUBROUTINE newton
