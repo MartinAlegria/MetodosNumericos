@@ -4,7 +4,8 @@ PROGRAM SECOND_PARTIAL
 	!CALL gauss_elimination()
 	!CALL lu_decomp()
 	!CALL gauss_seidel()
-	CALL lagrange()
+	!CALL lagrange()
+	CALL newton()
 
 END PROGRAM SECOND_PARTIAL
 
@@ -77,7 +78,7 @@ SUBROUTINE gauss_elimination()
 	close(2)
 	!********** EXPORT TO CSV **********!
 
-	!********** BACKWARDS SUBSTITUTION **********! !*********** DONE ***********!
+	!********** BACKWARDS SUBSTITUTION **********! !*********** DONE ***********!  !####### DONE -------------->
 END SUBROUTINE gauss_elimination
 
 SUBROUTINE lu_decomp()
@@ -176,7 +177,7 @@ SUBROUTINE lu_decomp()
 	write(2,*)"Xsub",(",",j,j=1,n)
 	write(2,*)"-", (",",x(i), i=1,n)
 	close(2)
-	!********** EXPORT TO CSV **********! !*********** DONE ***********!
+	!********** EXPORT TO CSV **********! !*********** DONE ***********!			!####### DONE -------------->
 END SUBROUTINE lu_decomp
 
 SUBROUTINE gauss_seidel()
@@ -244,17 +245,17 @@ SUBROUTINE gauss_seidel()
  	write(*,*) "@@@@ FINAL -------", x(:)
 
 	close(10)
-	!********** READ FILE **********!
+	!********** READ FILE **********!		!####### DONE -------------->
 END SUBROUTINE gauss_seidel
 
 !********** Interpolation **********!
 
-SUBROUTINE power_series()
+SUBROUTINE power_series()			
 END SUBROUTINE power_series
 
 SUBROUTINE lagrange()
 	!********** READ FILE **********!
-	INTEGER :: n, n_1,i,j,k,l 
+	INTEGER :: n,i,j,k,l 
 	DOUBLE PRECISION, dimension (:), allocatable :: y
 	DOUBLE PRECISION, dimension (:), allocatable :: x
 	DOUBLE PRECISION, dimension (:), allocatable :: poly
@@ -274,7 +275,8 @@ SUBROUTINE lagrange()
 		write(*,*)x(i),y(i)
 	enddo
 
-	
+	close(10)
+
 	do i=1, n
 		up = 1
 		down = 1
@@ -287,15 +289,50 @@ SUBROUTINE lagrange()
 		poly(i) = up/down
 	end do
  
-	close(10)
+	
 
 	res = dot_product(poly(:),y(:))	
 	write(*,*) "######## ANSWER", res  
-	!********** READ FILE **********!	
-
+	!********** READ FILE **********!				!####### DONE -------------->
 END SUBROUTINE lagrange
 
 SUBROUTINE newton()
+
+	!********** READ FILE **********!
+	INTEGER :: n,n_1,i,j,k,l 
+	DOUBLE PRECISION, dimension (:), allocatable :: y
+	DOUBLE PRECISION, dimension (:), allocatable :: x
+	DOUBLE PRECISION, dimension (:,:), allocatable :: diff
+	DOUBLE PRECISION :: temp
+
+	r = 2
+
+	open(unit = 10, file = "interpolation.txt")
+	read(10,*)n
+	n_1 = n-1
+	allocate ( y(n) )
+	allocate ( x(n) )
+	allocate ( diff(n_1,n_1) )
+
+
+	write(*,*) "************* Read Matrix *************"   
+	do i=1,n
+		read(10,*)x(i),y(i)
+		write(*,*)x(i),y(i)
+	enddo
+
+	close(10)
+
+	do j=1,n-1
+		!write(*,*) y(j+1), y(j) , x(j+1), x(j)
+		diff(1,j) = (y(j+1) - y(j))/(x(j+1) - x(j))
+	enddo
+
+
+
+	write(*,*) diff(1,:)
+
+
 END SUBROUTINE newton
 
 !********* FILE ************!
