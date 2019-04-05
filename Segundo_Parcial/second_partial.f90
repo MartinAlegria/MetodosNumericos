@@ -1,11 +1,52 @@
 PROGRAM SECOND_PARTIAL
 
 	IMPLICIT NONE
+	INTEGER :: selection
+	CHARACTER::loop
 	!CALL gauss_elimination()
 	!CALL lu_decomp()
 	!CALL gauss_seidel()
+	!CALL power_series()
 	!CALL lagrange()
 	!CALL newton()
+	DO
+      write (*,*) "WELCOME!"
+      write (*,*) "########### BE SURE TO READ THE README.txt FILE BEFORE USING THE PROGRAM ###############"
+      write (*,*) "WHAT METHOD DO YOU WANT TO USE [TYPE THE NUMBER OF THE DESIRED METHOD]"
+      write (*,*) "########### SYSTEM OF EQUATIONS ###############" 
+      write (*,*) "1) GAUSS ELIMINATION"
+      write (*,*) "2) LU DECOMPOSITION"
+      write (*,*) "3) GAUSS-SEIDEL"
+      write (*,*) "########### INTERPOLATION ###############" 
+      write (*,*) "4) POWER SERIES"
+      write (*,*) "5) LAGRANGE"
+      write (*,*) "6) NEWTON"
+
+      read(*,*)selection
+
+      SELECT CASE(selection)
+         CASE(1)
+            CALL gauss_elimination()
+         CASE(2)
+            CALL lu_decomp()
+         CASE(3)
+            CALL gauss_seidel()
+         CASE(4)
+            CALL power_series()
+         CASE(5)
+          	CALL lagrange()
+         CASE(6)
+          	CALL newton()
+
+      END SELECT
+      
+      write (*,*) "DO YOU WANT TO TRY ANOTHER METHOD ? [Y/N]"
+      read(*,*) loop
+      if(loop == "N" .OR. loop == "n") then
+         exit
+      end if
+
+  END DO
 
 END PROGRAM SECOND_PARTIAL
 
@@ -256,7 +297,133 @@ END SUBROUTINE gauss_seidel
 
 !********** Interpolation **********!
 
-SUBROUTINE power_series()			
+SUBROUTINE power_series()
+	!********** READ FILE **********!
+	INTEGER :: n,i,j,k,l 
+	DOUBLE PRECISION, dimension (:,:), allocatable :: lm
+	DOUBLE PRECISION, dimension (:,:), allocatable :: um
+	DOUBLE PRECISION, dimension (:,:), allocatable :: matrix
+	DOUBLE PRECISION, dimension (:), allocatable :: y
+	DOUBLE PRECISION, dimension (:), allocatable :: x
+	DOUBLE PRECISION, dimension (:), allocatable :: b
+	DOUBLE PRECISION :: up, down,r, res
+
+	open(unit = 10, file = "interpolation.txt")
+	read(10,*)n,r
+	allocate ( y(n) )
+	allocate ( x(n) )
+	allocate ( b(n) )
+	allocate ( matrix(n,n) )
+	allocate ( lm(n,n) )
+	allocate ( um(n,n) )
+
+	write(*,*) "************* Read Data *************"   
+	do i=1,n
+		read(10,*)x(i),b(i)
+		write(*,*)x(i),b(i)
+	enddo
+
+	write(*,*) "************* Number to interpolate: ", r
+	write(*,*) "************************************************"
+
+	do i=1,n
+		do j=1,n
+			if (j/=1) then
+				matrix(i,j) = x(i)**(j-1)
+			endif	
+		enddo	
+	end do	
+
+	matrix(:,1) = 1
+
+	write(*,*) "************* MATRIX TO SOLVE *************"
+	do i=1,n
+		write(*,*) matrix(i,:)
+	enddo
+
+	close(10)
+
+	lm(:,1) = matrix(:,1)
+	um(1,:) = matrix(1,:)/lm(1,1)
+	um(1,1) = 1;
+
+	do k=2,n
+		do j=2,n
+			
+			do i=j,n
+					lm(i,j) = matrix(i,j) - dot_product(lm(i,1:j-1), um(1:j-1,j))
+			enddo
+			um(k,j) = (matrix(k,j) - dot_product(lm(k,1:k-1), um(1:k-1,j)) )/lm(k,k)
+		enddo
+	enddo
+
+	do i=n-1,1,-1
+		do j=n,i+1,-1
+			lm(i,j) = 0
+		enddo
+	enddo
+
+	do i=2,n
+		do j=1,i-1
+			um(i,j)=0
+		enddo
+	enddo
+
+	write(*,*) "************* L matrix *************"
+	do i=1,n
+		write(*,*)lm(i,:)
+	enddo
+	write(*,*) "************* U matrix *************"
+	do i=1,n
+		write(*,*)um(i,:)
+	enddo
+	write(*,*) "************* B matrix *************"
+	write(*,*) b(:)
+
+	! ******* FOWARD SUBSTITUTION
+	do i=1,n
+		temps = b(i)
+		do j=1,i-1
+			temps = temps - lm(i,j)*y(j)
+		enddo
+		y(i) = temps/lm(i,i)
+	enddo
+
+	write(*,*) "Y MATRIX *********************"
+	write(*,*) y(:)
+
+	x(n) = (y(n)/um(n,n))!--- Get Xsub1 first
+	write(*,*) x(n)
+	do i=n-1, 1, -1
+		temps = 0
+		do j=i+1, n
+			temps = temps + um(i,j)*x(j)
+		enddo
+		x(i) = (y(i) - temps)/um(i,i)
+	enddo
+
+	res = 0
+	do i=1,n
+		if (i /=1) then
+			res = res + (x(i) *(r**(i-1)))
+		else
+			res = res + x(i)
+		endif
+	enddo
+
+	write(*,*)res
+
+	!********** EXPORT TO CSV **********!
+	open (unit = 2, file = "power_series.csv")
+	write(*,*) "************* RESULTS EXPORTED TO CSV ************* "
+	write(2,*) "POLYNOMIAL:"
+	write(2,*) x(1), "+",(x(j), "x^", (j-1),j=2,n)
+	write(2,*)"RESULT:"
+	write(2,*) res
+	close(2)
+	!********** EXPORT TO CSV **********!
+
+
 END SUBROUTINE power_series
 
 SUBROUTINE lagrange()
