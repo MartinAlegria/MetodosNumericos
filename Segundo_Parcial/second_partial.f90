@@ -61,7 +61,7 @@ SUBROUTINE gauss_elimination()
 	DOUBLE PRECISION, dimension (:), allocatable :: results
 	DOUBLE PRECISION :: temps
 
-	open(unit = 10, file = "test.txt")
+	open(unit = 10, file = "system_eq.txt")
 	read(10,*)n
 	write(*,*)n
 	n_1 = n+1
@@ -134,7 +134,7 @@ SUBROUTINE lu_decomp()
 	DOUBLE PRECISION, dimension (:), allocatable :: b
 	DOUBLE PRECISION :: temps
 
-	open(unit = 10, file = "test.txt")
+	open(unit = 10, file = "system_eq.txt")
 	read(10,*)n
 	n_1 = n+1
 	allocate ( matrix(n,n) )
@@ -233,7 +233,7 @@ SUBROUTINE gauss_seidel()
 	DOUBLE PRECISION, dimension (:), allocatable :: b
 	DOUBLE PRECISION :: temps, sum, error,tol
 
-	open(unit = 10, file = "test.txt")
+	open(unit = 10, file = "system_eq.txt")
 	read(10,*)n
 	n_1 = n+1
 	allocate ( matrix(n,n) )
@@ -469,7 +469,7 @@ SUBROUTINE lagrange()
 
 	!********** EXPORT TO CSV **********!
 	open (unit = 2, file = "lagrange.csv")
-	write(2,*) "RESPUESTA:"
+	write(2,*) "RESULT:"
 	write(2,*) res
 	close(2)
 	!********** EXPORT TO CSV **********!
