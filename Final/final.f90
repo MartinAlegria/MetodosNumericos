@@ -23,6 +23,7 @@ PROGRAM SECOND_PARTIAL
       write (*,*) "6) NEWTON"
 			write (*,*) "7) REGRESSION"
 			write (*,*) "8) TRAPEZOIDAL"
+			write(*,*)  "9) SIMPSON 1/3"
 
 
       read(*,*)selection
@@ -44,6 +45,8 @@ PROGRAM SECOND_PARTIAL
 						CALL regression()
 					CASE(8)
 						CALL trapezoidal()
+					CASE(9)
+						CALL simpson13()
       END SELECT
 
       write (*,*) "DO YOU WANT TO TRY ANOTHER METHOD ? [Y/N]"
@@ -83,6 +86,36 @@ SUBROUTINE trapezoidal()
 	write(*,*) res
 
 END SUBROUTINE trapezoidal
+
+SUBROUTINE simpson13()
+	INTEGER :: n,i,j,k,l,n_1
+	DOUBLE PRECISION, dimension (:), allocatable :: y
+	DOUBLE PRECISION, dimension (:), allocatable :: x
+	!DOUBLE PRECISION, dimension (:), allocatable :: poly
+	DOUBLE PRECISION :: res=0.0
+
+	open(unit = 10, file = "Regression.txt")
+	read(10,*)n,r
+	allocate ( y(n) )
+	allocate ( x(n) )
+	!allocate ( poly(n) )
+
+	write(*,*) "************* Read Data *************"
+	do i=1,n
+		read(10,*)x(i),y(i)
+		write(*,*)x(i),y(i)
+	enddo
+
+	!write(*,*) "************* Number of regression: ", r
+	close(10)
+	n_1=n-1
+	do i=1,n_1
+		res=((x(i+1)-x(i))/3)*(y(i)+y(i+1)+y(i+2))+res
+	end do
+	write(*,*) res
+
+END SUBROUTINE simpson13
+
 SUBROUTINE regression()
 	INTEGER :: n,i,j,k,l
 	DOUBLE PRECISION, dimension (:), allocatable :: y
