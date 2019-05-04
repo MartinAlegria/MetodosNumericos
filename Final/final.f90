@@ -4,8 +4,7 @@ PROGRAM SECOND_PARTIAL
 	INTEGER :: selection
 	CHARACTER::loop
 
-	write(*,*) mod(2,2)
-	CALL simpson1_3()
+	CALL simpson3_8()
 	
 
 END PROGRAM SECOND_PARTIAL
@@ -698,8 +697,10 @@ SUBROUTINE simpson1_3()
 
 	INTEGER:: op, inters, tol, i
 	DOUBLE PRECISION:: upper_int, lower_int, diff,h,f,res
+	DOUBLE PRECISION, dimension (:), allocatable :: f_x
 	DOUBLE PRECISION, dimension (:), allocatable :: x
-	INTEGER, dimension (:), allocatable :: f_x
+
+	write (*,*) " ################# SIMPSON 1/3 #################"
 
 	write (*,*) "WILL YOU BE USING SCATTERED DATA OR A FUNCTION ?"
 	write (*,*) "1) DATA"
@@ -736,7 +737,7 @@ SUBROUTINE simpson1_3()
 		END DO
 		res = 0
 		DO i=1,inters
-			if (i==0 .OR. i==n) then
+			if (i==0 .OR. i==inters) then
 				res = res + f_x(i)
 			else if (MOD(i,2) /= 0) then
 				res = res + 4*f_x(i)
@@ -750,6 +751,67 @@ SUBROUTINE simpson1_3()
 	endif
 
 END SUBROUTINE simpson1_3
+
+SUBROUTINE simpson3_8()
+	INTEGER:: op, inters, tol, i
+	DOUBLE PRECISION:: upper_int, lower_int, diff,h,f,res
+	DOUBLE PRECISION, dimension (:), allocatable :: f_x
+	DOUBLE PRECISION, dimension (:), allocatable :: x
+
+	write (*,*) " ################# SIMPSON 3/8 #################"
+
+	write (*,*) "WILL YOU BE USING SCATTERED DATA OR A FUNCTION ?"
+	write (*,*) "1) DATA"
+	write (*,*) "2) FUNCTION"
+
+	read(*,*)op
+
+	if (op == 1) then
+		CALL intervalos(lower_int,upper_int)
+		diff = upper_int-lower_int
+		write (*,*) "HOW MANY INTERVALS DO YOU WANT ?"
+		read(*,*) inters
+		h = (b-a)/inters
+
+
+
+	else
+		CALL intervalos(lower_int,upper_int)
+		diff = upper_int-lower_int
+		write (*,*) "HOW MANY INTERVALS DO YOU WANT ?"
+		write (*,*) "TIP: SOMETIMES USING LARGER INTERVALS GIVE A BETTER RESULT"
+		read(*,*)inters
+		h = diff/inters
+		allocate( x(inters) )
+		allocate( f_x(inters) )
+		i = 0
+		! --  CREATE AN ARRAY WITH ALL THE VALUES OF X WE WILL EVALUATE -- !
+		DO i=1,inters
+			x(i) = lower_int + (i*h) 
+		END DO 
+		! --  CREATE AN ARRAY WITH THE EVALUATIONS OF THE VALUES OF X -- !
+		DO i=1,inters
+			f_x(i) = f(x(i))
+		END DO
+
+		write(*,*) "Intervals" , x(:)
+		write(*,*) "FX" , f_x(:)
+		res = 0
+		DO i=1,inters
+			if (i==0 .OR. i==inters) then
+				res = res + f_x(i)
+			else if (MOD(i,3) == 0) then
+				res = res + 2*f_x(i)
+			else
+				res = res + 3*f_x(i)
+			endif
+		END DO
+
+		res = res * (3*h/8)
+		write(*,*) "THE ANSWER IS = ", res
+	endif
+
+END SUBROUTINE simpson3_8
 
 !********** DIFFERENTIAL EQUATIONS **********!
 
@@ -769,7 +831,7 @@ END SUBROUTINE intervalos
 DOUBLE PRECISION FUNCTION f(x)
   IMPLICIT NONE
   DOUBLE PRECISION :: x
-  f = 5 + 2*x - 3*(x**2) + 4*(x**3)
+  f = (1/(1+ x*x))
 END FUNCTION f
 
 DOUBLE PRECISION FUNCTION f_prime(x)
