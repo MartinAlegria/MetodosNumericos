@@ -4,7 +4,9 @@ PROGRAM SECOND_PARTIAL
 	INTEGER :: selection
 	CHARACTER::loop
 
+	CALL simpson1_3()
 	CALL simpson3_8()
+
 	
 
 END PROGRAM SECOND_PARTIAL
@@ -709,14 +711,39 @@ SUBROUTINE simpson1_3()
 	read(*,*)op
 
 	if (op == 1) then
-		CALL intervalos(lower_int,upper_int)
+
+		open(unit = 10, file = "file.txt")
+		read(10,*)inters
+
+		allocate(x(inters))
+		allocate(f_x(inters))
+
+		do i=1,inters
+			read(10,*)x(i),f_x(i)
+			write(*,*)x(i),f_x(i)
+		enddo
+
+		close(10)
+
+		upper_int = x(inters)
+		lower_int = x(1)
+
 		diff = upper_int-lower_int
-		write (*,*) "HOW MANY INTERVALS DO YOU WANT ?"
-		read(*,*) inters
-		h = (b-a)/inters
+		h = (diff)/inters
 
+		res = 0
+		DO i=1,inters
+			if (i==0 .OR. i==inters) then
+				res = res + f_x(i)
+			else if (MOD(i,2) /= 0) then
+				res = res + 4*f_x(i)
+			else
+				res = res + 2*f_x(i)
+			endif
+		END DO
 
-
+		res = res * (h/3)
+		write(*,*) "THE ANSWER IS = ", real(res)
 	else
 		CALL intervalos(lower_int,upper_int)
 		diff = upper_int-lower_int
@@ -747,7 +774,7 @@ SUBROUTINE simpson1_3()
 		END DO
 
 		res = res * (h/3)
-		write(*,*) "THE ANSWER IS = ", res
+		write(*,*) "THE ANSWER IS = ", real(res)
 	endif
 
 END SUBROUTINE simpson1_3
@@ -767,13 +794,38 @@ SUBROUTINE simpson3_8()
 	read(*,*)op
 
 	if (op == 1) then
-		CALL intervalos(lower_int,upper_int)
+		open(unit = 10, file = "file.txt")
+		read(10,*)inters
+
+		allocate(x(inters))
+		allocate(f_x(inters))
+
+		do i=1,inters
+			read(10,*)x(i),f_x(i)
+			write(*,*)x(i),f_x(i)
+		enddo
+
+		close(10)
+
+		upper_int = x(inters)
+		lower_int = x(1)
+
 		diff = upper_int-lower_int
-		write (*,*) "HOW MANY INTERVALS DO YOU WANT ?"
-		read(*,*) inters
-		h = (b-a)/inters
+		h = (diff)/inters
 
+		res = 0
+		DO i=1,inters
+			if (i==0 .OR. i==inters) then
+				res = res + f_x(i)
+			else if (MOD(i,3) == 0) then
+				res = res + 2*f_x(i)
+			else
+				res = res + 3*f_x(i)
+			endif
+		END DO
 
+		res = res * (3*h/8)
+		write(*,*) "THE ANSWER IS = ", real(res)
 
 	else
 		CALL intervalos(lower_int,upper_int)
@@ -808,7 +860,7 @@ SUBROUTINE simpson3_8()
 		END DO
 
 		res = res * (3*h/8)
-		write(*,*) "THE ANSWER IS = ", res
+		write(*,*) "THE ANSWER IS = ", real(res)
 	endif
 
 END SUBROUTINE simpson3_8
