@@ -6,7 +6,7 @@ PROGRAM SECOND_PARTIAL
 
 	CALL simpson1_3()
 	CALL simpson3_8()
-
+	CALL trapezoid()
 	
 
 END PROGRAM SECOND_PARTIAL
@@ -695,6 +695,48 @@ END SUBROUTINE newton
 
 !********** NUMERICAL INTEGRATION **********!
 
+SUBROUTINE trapezoid()
+
+	INTEGER:: op,lol
+	DOUBLE PRECISION:: upper_int, lower_int, diff,h,f,res
+	DOUBLE PRECISION, dimension (:), allocatable :: f_x
+	DOUBLE PRECISION, dimension (:), allocatable :: x
+
+	write (*,*) " ################# TRAPEZOID #################"
+
+	write (*,*) "WILL YOU BE USING SCATTERED DATA OR A FUNCTION ?"
+	write (*,*) "1) DATA"
+	write (*,*) "2) FUNCTION"
+
+	read(*,*)op
+
+	if (op == 1) then
+	
+	else
+
+		CALL intervalos(lower_int,upper_int)
+		diff = upper_int-lower_int
+		write (*,*) "HOW MANY TRAPEZOIDS DO YOU WANT ?"
+		write (*,*) "TIP: SOMETIMES USING LARGER INTERVALS GIVE A BETTER RESULT"
+		read(*,*)inters
+		h = diff/inters
+		allocate( x(inters) )
+		allocate( f_x(inters) )
+		i = 0
+
+		res = f(lower_int) + f(upper_int)
+		lol = inters - 1
+		do i=1,lol
+				res = res + 2 * f(lower_int +i*h)
+		end do
+
+		res = res * (h/2)	
+		write(*,*) "RESULT = ", real(res)
+
+	endif
+
+END SUBROUTINE trapezoid
+
 SUBROUTINE simpson1_3()
 
 	INTEGER:: op, inters, tol, i
@@ -764,9 +806,9 @@ SUBROUTINE simpson1_3()
 		END DO
 		res = 0
 		DO i=1,inters
-			if (i==0 .OR. i==inters) then
+			if (i==0 .OR. i==inters) then ! -- SUM THE FIRST AND LAST TERMS --!
 				res = res + f_x(i)
-			else if (MOD(i,2) /= 0) then
+			else if (MOD(i,2) /= 0) then ! -- IF i IS NOT PAIR THE EVALUATION IS MULTIPLIED BY 4, ELSE IT IS MULT BY 2 --!
 				res = res + 4*f_x(i)
 			else
 				res = res + 2*f_x(i)
@@ -845,9 +887,7 @@ SUBROUTINE simpson3_8()
 		DO i=1,inters
 			f_x(i) = f(x(i))
 		END DO
-
-		write(*,*) "Intervals" , x(:)
-		write(*,*) "FX" , f_x(:)
+		
 		res = 0
 		DO i=1,inters
 			if (i==0 .OR. i==inters) then
