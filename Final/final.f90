@@ -939,7 +939,7 @@ SUBROUTINE euler()
 
 	DOUBLE PRECISION:: y, initial_x, h, aprox_x,df
 
-	y = 0.000000
+	y = 0.00000
 	initial_x = 0.000000
 	h = 120
 	aprox_x = 120
