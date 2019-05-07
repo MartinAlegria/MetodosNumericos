@@ -711,7 +711,34 @@ SUBROUTINE trapezoid()
 	read(*,*)op
 
 	if (op == 1) then
-	
+
+		open(unit = 10, file = "file.txt")
+		read(10,*)inters
+
+		allocate(x(inters))
+		allocate(f_x(inters))
+
+		do i=1,inters
+			read(10,*)x(i),f_x(i)
+			write(*,*)x(i),f_x(i)
+		enddo
+
+		close(10)
+
+		upper_int = x(inters)
+		lower_int = x(1)
+		diff = upper_int-lower_int
+		h = (diff)/inters
+
+		res = f_x(1) + f_x(inters)
+		lol = inters - 1
+		do i=2,lol
+				res = res + 2 * f_x(i)
+		end do
+
+		res = res * (h/2)	
+		write(*,*) "RESULT = ", real(res)
+
 	else
 
 		CALL intervalos(lower_int,upper_int)
