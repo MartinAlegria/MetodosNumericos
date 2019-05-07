@@ -16,22 +16,43 @@ PROGRAM SECOND_PARTIAL
 
 	SELECT CASE(selection)
 		CASE(1) ! *********** NON LINEAR EQUATIONS!
+			Write(*,*) " WHAT METHOD DO YOU WANT TO USE ? "
+			write(*,*) " 1.) BISECTION"
+			write(*,*) " 2.) FALSE POSITION"
+			write(*,*) " 3.) NEWTON-RALPHSON"
+			Write(*,*) " 4.) SECANT"
 			
 
 		CASE(2)! ***********  SYSTEMS OF LINEAR EQUATIONS!
 			
+			write(*,*) " WHAT METHOD DO YOU WANT TO USE ? "
+			write(*,*) " 1.) GAUSSIAN ELIMINATION"
+			write(*,*) " 2.) LU DECOMPOSITION"
+			write(*,*) " 3.) GAUSS-SEIDEL"
 
 		CASE(3)! *********** INTERPOLATION!
-			
+		
+			write(*,*) " WHAT METHOD DO YOU WANT TO USE ? "
+			write(*,*) " 1.) POWER SERIES"
+			write(*,*) " 2.) LAGRANGE"
+			write(*,*) " 3.) NEWTON DIVIDED DIFFERENCES"
 
 		CASE(4)! *********** REGRESSION!
-			
 
 		CASE(5)! *********** NUMERICAL INTEGRATION!
-			
+
+			write(*,*) " WHAT METHOD DO YOU WANT TO USE ? "
+			write(*,*) " 1.) TRAPEZOID"
+			write(*,*) " 2.) SIMPSON 1/3"
+			write(*,*) " 3.) SIMPSON 3/8"
 
 		CASE(6)! *********** ORDINARY DIFFERENTIAL EQUATIONS!
-			
+
+			write(*,*) " WHAT METHOD DO YOU WANT TO USE ? "
+			write(*,*) " 1.) EULER"
+			write(*,*) " 2.) MODIFIED EULER"
+			write(*,*) " 3.) RANGE KUTTEN 3rd ORDER"
+			write(*,*) " 4.) RANGE KUTTEN 4th ORDER"
 
 	END SELECT
 
