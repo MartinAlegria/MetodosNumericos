@@ -4,10 +4,10 @@ PROGRAM SECOND_PARTIAL
 	INTEGER :: selection
 	CHARACTER::loop
 
-	CALL simpson1_3()
-	CALL simpson3_8()
-	CALL trapezoid()
-	
+	!CALL simpson1_3()
+	!CALL simpson3_8()
+	!CALL trapezoid()
+	CALL euler()
 
 END PROGRAM SECOND_PARTIAL
 
@@ -934,6 +934,26 @@ END SUBROUTINE simpson3_8
 
 !********** DIFFERENTIAL EQUATIONS **********!
 
+SUBROUTINE euler()
+
+	DOUBLE PRECISION:: y, initial_x, h, aprox_x,df
+
+	y = 1.000000
+	initial_x = 0.000000
+	h = 0.5
+	aprox_x = 1
+
+	write (*,*) " ################# EULER METHOD #################"
+
+	DO WHILE( initial_x < aprox_x)
+		!write(*,*) initial_x, y
+		y = y + h * df(initial_x, y)
+		initial_x = initial_x + h
+	END DO
+
+	write(*,*) "X: ",initial_x, "Y:", y
+
+END SUBROUTINE euler
 
 
 !********** UTILS **********!
@@ -959,7 +979,11 @@ DOUBLE PRECISION FUNCTION f_prime(x)
   f_prime = 2 - 6*x + 12*(x**2)
 END FUNCTION f_prime
 
-
+DOUBLE PRECISION FUNCTION df(x,y)
+  IMPLICIT NONE
+  DOUBLE PRECISION :: x,y
+  df = (y/2)
+END FUNCTION df
 
 
 
