@@ -3,158 +3,260 @@ PROGRAM SECOND_PARTIAL
 	IMPLICIT NONE
 	INTEGER :: selection
 	CHARACTER::loop
-	!CALL gauss_elimination()
-	!CALL lu_decomp()
-	!CALL gauss_seidel()
-	!CALL power_series()
-	!CALL lagrange()
-	!CALL newton()
-	DO
-      write (*,*) "WELCOME!"
-      write (*,*) "########### BE SURE TO READ THE README.txt FILE BEFORE USING THE PROGRAM ###############"
-      write (*,*) "WHAT METHOD DO YOU WANT TO USE [TYPE THE NUMBER OF THE DESIRED METHOD]"
-      write (*,*) "########### SYSTEM OF EQUATIONS ###############"
-      write (*,*) "1) GAUSS ELIMINATION"
-      write (*,*) "2) LU DECOMPOSITION"
-      write (*,*) "3) GAUSS-SEIDEL"
-      write (*,*) "########### INTERPOLATION ###############"
-      write (*,*) "4) POWER SERIES"
-      write (*,*) "5) LAGRANGE"
-      write (*,*) "6) NEWTON"
-			write (*,*) "7) REGRESSION"
-			write (*,*) "8) TRAPEZOIDAL"
-			write(*,*)  "9) SIMPSON 1/3"
+
+	write(*,*) " ############### NUMERICAL METHODS ###############"
+	write(*,*) " PLEASE BE SURE TO READ THE README.txt FILE BEFORE USING THE PRORGAM "
+	write(*,*) " WHAT DO YOU WANT TO SOLVE ? "
+	write(*,*) " 1.) NON LINEAR EQUATIONS"
+	write(*,*) " 2.) SYSTEMS OF LINEAR EQUATIONS"
+	write(*,*) " 3.) INTERPOLATION"
+	write(*,*) " 4.) REGRESSION"
+	write(*,*) " 5.) NUMERICAL INTEGRATION"
+	write(*,*) " 6.) ORDINARY DIFFERENTIAL EQUATIONS"
+  read(*,*) selection
+	SELECT CASE(selection)
+		CASE(1) ! *********** NON LINEAR EQUATIONS!
+			write(*,*) "WHAT METHOD DO YOU WANT TO USE? "
+			write(*,*) " 1.) BISECTION"
+			write(*,*) " 2.) FALSE POSITION"
+			write(*,*) " 3.) NEWTHON RAPHSON"
+			write(*,*) " 4.) SECANT"
+			read(*,*) selection
+			SELECT CASE(selection)
+			CASE(1)
+				CALL bisection()
+			CASE(2)
+				CALL false_position()
+			CASE(3)
+				CALL newton_raph()
+			CASE(4)
+				CALL secant()
+
+			END SELECT
+		CASE(2)! ***********  SYSTEMS OF LINEAR EQUATIONS!
 
 
-      read(*,*)selection
+		CASE(3)! *********** INTERPOLATION!
 
-      SELECT CASE(selection)
-         CASE(1)
-            CALL gauss_elimination()
-         CASE(2)
-            CALL lu_decomp()
-         CASE(3)
-            CALL gauss_seidel()
-         CASE(4)
-            CALL power_series()
-         CASE(5)
-          	CALL lagrange()
-         CASE(6)
-          	CALL newton()
-					CASE(7)
-						CALL regression()
-					CASE(8)
-						CALL trapezoidal()
-					CASE(9)
-						CALL simpson13()
-      END SELECT
 
-      write (*,*) "DO YOU WANT TO TRY ANOTHER METHOD ? [Y/N]"
-      read(*,*) loop
-      if(loop == "N" .OR. loop == "n") then
-         exit
-      end if
+		CASE(4)! *********** REGRESSION!
 
-  END DO
+
+		CASE(5)! *********** NUMERICAL INTEGRATION!
+
+
+		CASE(6)! *********** ORDINARY DIFFERENTIAL EQUATIONS!
+
+
+	END SELECT
+
+
+	!CALL simpson1_3()
+	!CALL simpson3_8()
+	!CALL trapezoid()
+	!CALL euler()
+	!CALL mod_euler()
+	!CALL rk3()
+	!CALL rk4()
+
+	write(*,*) "DO YOU WANT TO USE DATA OR "
 
 END PROGRAM SECOND_PARTIAL
-SUBROUTINE trapezoidal()
-	INTEGER :: n,i,j,k,l,n_1
-	DOUBLE PRECISION, dimension (:), allocatable :: y
-	DOUBLE PRECISION, dimension (:), allocatable :: x
-	!DOUBLE PRECISION, dimension (:), allocatable :: poly
-	DOUBLE PRECISION :: res=0.0
 
-	open(unit = 10, file = "Regression.txt")
-	read(10,*)n,r
-	allocate ( y(n) )
-	allocate ( x(n) )
-	!allocate ( poly(n) )
+!********** Non-Linear Equations **********!
 
-	write(*,*) "************* Read Data *************"
-	do i=1,n
-		read(10,*)x(i),y(i)
-		write(*,*)x(i),y(i)
-	enddo
+SUBROUTINE bisection()
+  IMPLICIT NONE
+  DOUBLE PRECISION :: a,b,c,f
+  REAL :: tol, iters, start
+  LOGICAL:: interval
+  interval = .FALSE.
 
-	!write(*,*) "************* Number of regression: ", r
-	close(10)
-	n_1=n-1
-	do i=1,n_1
-		res=((x(i+1)-x(i))/2)*(y(i)+y(i+1))+res
-	end do
-	write(*,*) res
+  print *," #################### BISECTION ####################"
+  CALL intervalos(a,b)
 
-END SUBROUTINE trapezoidal
+  DO WHILE (interval .EQV. .FALSE.)
+     write(*,*) f(a)
+     write(*,*) f(b)
+     if((f(a)*f(b)) .LT. 0) then
+        print *,"Perfect!"
+        interval = .TRUE.
+     else
+        print *,"No interval, try again"
+        print *, "------------------------------------"
+        CALL intervalos(a,b)
+     end if
+  END DO
 
-SUBROUTINE simpson13()
-	INTEGER :: n,i,j,k,l,n_1
-	DOUBLE PRECISION, dimension (:), allocatable :: y
-	DOUBLE PRECISION, dimension (:), allocatable :: x
-	!DOUBLE PRECISION, dimension (:), allocatable :: poly
-	DOUBLE PRECISION :: res=0.0
+  print *,"Input the tolerance:"
+  read (*,*) tol
+  print *, "Input the number of iterations"
+  read (*,*) iters
 
-	open(unit = 10, file = "Regression.txt")
-	read(10,*)n,r
-	allocate ( y(n) )
-	allocate ( x(n) )
-	!allocate ( poly(n) )
+  DO
+     c = (a+b)/2.0
+     if(f(c) .GT. 0) then
+        b = c
+     else
+        a = c
+     end if
 
-	write(*,*) "************* Read Data *************"
-	do i=1,n
-		read(10,*)x(i),y(i)
-		write(*,*)x(i),y(i)
-	enddo
+     if (abs(b-a) <= tol ) then
+        write (*,*) "The result is: ", c
+        write (*,*) "Iters:", start
+        EXIT
+     end if
 
-	!write(*,*) "************* Number of regression: ", r
-	close(10)
-	n_1=n-1
-	do i=1,n_1
-		res=((x(i+1)-x(i))/3)*(y(i)+y(i+1)+y(i+2))+res
-	end do
-	write(*,*) res
+     if (start == iters) then
+        write (*,*) "The result after all iterations is: ", c
+        write (*,*) "Iters:", start
+        EXIT
+     end if
+     start = start +1
+ END DO  !---------------> BISECTION!
+END SUBROUTINE bisection
 
-END SUBROUTINE simpson13
+SUBROUTINE false_position()
+   IMPLICIT NONE
+   DOUBLE PRECISION :: a,b,c,f
+   REAL:: tol,iters,start
+   LOGICAL interval
+   interval = .FALSE.
 
-SUBROUTINE regression()
-	INTEGER :: n,i,j,k,l
-	DOUBLE PRECISION, dimension (:), allocatable :: y
-	DOUBLE PRECISION, dimension (:), allocatable :: x
-	DOUBLE PRECISION, dimension (:), allocatable :: poly
-	DOUBLE PRECISION :: sumx=0.0, sumy=0.0,r, sumxy=0.0,sumx2=0.0,a0,a1
+   print *," #################### FALSE POSITION METHOD ####################"
+   CALL intervalos(a,b)
 
-	open(unit = 10, file = "Regression.txt")
-	read(10,*)n,r
-	allocate ( y(n) )
-	allocate ( x(n) )
-	allocate ( poly(n) )
+   DO WHILE (interval .EQV. .FALSE.)
+   write(*,*) f(a)
+   write(*,*) f(b)
+   if((f(a)*f(b)) .LT. 0) then
+      print *,"Perfect!"
+      interval = .TRUE.
+   else
+      print *,"No interval, try again"
+      print *, "---------------------------------------"
+      CALL intervalos(a,b)
+   end if
+   END DO
 
-	write(*,*) "************* Read Data *************"
-	do i=1,n
-		read(10,*)x(i),y(i)
-		write(*,*)x(i),y(i)
-	enddo
+   print *,"Input the tolerance"
+   read (*,*) tol
+   print *, "Input the number of iterations"
+   read (*,*) iters
 
-	write(*,*) "************* Number of regression: ", r
-	close(10)
-IF (r<=1) then
-	write(*,*) "Linear regression"
-	do i=1,n
-		sumx=sumx+x(i)
-		sumy=sumy+y(i)
-		sumxy=sumxy+x(i)*y(i)
-		sumx2=sumx2+x(i)**2
-	end do
-a1=(n*sumxy-sumx*sumy)/(n*sumx2-(sumx**2))
-a0=(sumy/n)-a1*(sumx/n)
-write(*,*) a0
-write(*,*) a1
+   DO
+   c=b-(f(b)*(b-a))/(f(b)-f(a))
+   if(f(c) .GT. 0)then
+      b = c
+   else
+      a = c
+   end if
 
-ELSE
-	write(*,*) "Cuadratic or cubic regression"
-END IF
+   if( abs(f(c)) <=  tol )then
+      write (*,*) "The result is: ", c
+      write (*,*) "Iters:", start
+      EXIT
+   end if
 
-END SUBROUTINE regression
+   if (start == iters) then
+      write (*,*) "The result After all the iterations is: ", c
+      write (*,*) "Iters:", start
+      EXIT
+   end if
+
+   start = start + 1
+   END DO !---------------> FALSE POSITION!
+END SUBROUTINE false_position
+
+SUBROUTINE newton_raph()
+   IMPLICIT NONE
+   DOUBLE PRECISION:: guess,p,f,f_prime
+   REAL:: tol,iters,start
+
+   print *," #################### NEWTON-RAPHSON METHOD ####################"
+   write (*,*) "Enter your guess:"
+   read (*,*) guess
+   print *,"Enter the tolerance:"
+   read (*,*) tol
+   print *, "Enter the number of iterations desired:"
+   read (*,*) iters
+   p = guess
+   start = 0
+
+   DO
+      write (*,*) "P: ", p
+      write (*,*) "F(P):", f(p)
+      write (*,*) "F'(P):", f_prime (p)
+      if ( abs(f(p)) <= tol) then
+         write (*,*) "The result is:", p
+         write (*,*) "Iters: ", start
+         EXIT
+      end if
+
+      if (start == iters) then
+         write (*,*) "The result after all iterations is:", p
+         write (*,*) "Iters: ", start
+         EXIT
+      end if
+      p = p - (f(p)/ f_prime(p))
+      write (*,*) "New P: ", p
+      write (*,*) "Iters: ", start
+      write (*,*) "*************************"
+      start = start + 1
+
+   END DO !---------------> NEWTON-RAPHSON!
+END SUBROUTINE newton_raph
+
+SUBROUTINE secant()
+   IMPLICIT NONE
+   DOUBLE PRECISION:: guess, p, p_1,f,temp
+   REAL:: tol,iters,start
+
+   print *," #################### SECANT METHOD ####################"
+
+   write (*,*) "Enter your guess (CANT BE ZERO [0]):"
+   read (*,*) guess
+   print *,"Enter the tolerance:"
+   read (*,*) tol
+   print *, "Enter the number of iterations desired:"
+   read (*,*) iters
+
+   p = guess
+   start  = 0
+
+   write (*,*) "P: ", p
+   write (*,*) "F(P):", f(p)
+   if (abs(f(p)) <= tol) then
+      write (*,*) "The result is:", p
+      write (*,*) "Iters: ", start
+   end if
+   p_1 = p
+   p = p * 0.99
+
+   DO
+      write (*,*) "P: ", p
+      write (*,*) "F(P):", f(p)
+      if (abs(f(p)) <= tol) then
+         write (*,*) "The result is:", p
+         write (*,*) "Iters: ", start
+         EXIT
+      end if
+
+      if (start == iters) then
+         write (*,*) "The result is:", p
+         write (*,*) "Iters: ", start
+         EXIT
+      end if
+      temp = p
+      p = p - (f(p)*(p-p_1))/(f(p)-f(p_1))
+      p_1 = temp
+      write (*,*) "New P: ", p
+      write (*,*) "Iters: ", start
+      write (*,*) "*************************"
+      start = start + 1
+
+   END DO !---------------> SECANT!
+END SUBROUTINE secant
 
 !********** System of Linear Equations **********!
 
@@ -167,13 +269,14 @@ SUBROUTINE gauss_elimination()
 	DOUBLE PRECISION, dimension (:), allocatable :: results
 	DOUBLE PRECISION :: temps
 
-	open(unit = 10, file = "test.txt")
+	open(unit = 10, file = "system_eq.txt")
 	read(10,*)n
 	write(*,*)n
 	n_1 = n+1
 	allocate ( matrix(n,n_1) )
 	allocate ( calcs(n,n_1) )
 	allocate ( results(n) )
+
 	do i=1,n
 		read(10,*)matrix(i,:)
 		write(*,*)matrix(i,:)
@@ -226,7 +329,7 @@ SUBROUTINE gauss_elimination()
 	close(2)
 	!********** EXPORT TO CSV **********!
 
-	!********** BACKWARDS SUBSTITUTION **********! !*********** DONE ***********!  !####### DONE -------------->
+	!********** BACKWARDS SUBSTITUTION **********! !*********** DONE ***********!  !####### DONE --------------> !---------------> GAUSS ELIMINATION!
 END SUBROUTINE gauss_elimination
 
 SUBROUTINE lu_decomp()
@@ -240,7 +343,7 @@ SUBROUTINE lu_decomp()
 	DOUBLE PRECISION, dimension (:), allocatable :: b
 	DOUBLE PRECISION :: temps
 
-	open(unit = 10, file = "test.txt")
+	open(unit = 10, file = "system_eq.txt")
 	read(10,*)n
 	n_1 = n+1
 	allocate ( matrix(n,n) )
@@ -326,7 +429,7 @@ SUBROUTINE lu_decomp()
 	write(2,*)"Xsub",(",",j,j=1,n)
 	write(2,*)"-", (",",x(i), i=1,n)
 	close(2)
-	!********** EXPORT TO CSV **********! !*********** DONE ***********!			!####### DONE -------------->
+	!********** EXPORT TO CSV **********! !*********** DONE ***********!			!####### DONE --------------> !---------------> LU-DECOMPOSITION!
 END SUBROUTINE lu_decomp
 
 SUBROUTINE gauss_seidel()
@@ -339,7 +442,7 @@ SUBROUTINE gauss_seidel()
 	DOUBLE PRECISION, dimension (:), allocatable :: b
 	DOUBLE PRECISION :: temps, sum, error,tol
 
-	open(unit = 10, file = "test.txt")
+	open(unit = 10, file = "system_eq.txt")
 	read(10,*)n
 	n_1 = n+1
 	allocate ( matrix(n,n) )
@@ -398,7 +501,7 @@ SUBROUTINE gauss_seidel()
 	write(2,*)"-", (",",x(i), i=1,n)
 	close(2)
 	!********** EXPORT TO CSV **********!
-	!********** READ FILE **********!		!####### DONE -------------->
+	!********** READ FILE **********!		!####### DONE --------------> !---------------> GAUSS-SEIDEL!
 END SUBROUTINE gauss_seidel
 
 !********** Interpolation **********!
@@ -527,9 +630,7 @@ SUBROUTINE power_series()
 	write(2,*)"RESULT:"
 	write(2,*) res
 	close(2)
-	!********** EXPORT TO CSV **********!
-
-
+	!********** EXPORT TO CSV **********! !---------------> POWER SERIES!
 END SUBROUTINE power_series
 
 SUBROUTINE lagrange()
@@ -575,12 +676,12 @@ SUBROUTINE lagrange()
 
 	!********** EXPORT TO CSV **********!
 	open (unit = 2, file = "lagrange.csv")
-	write(2,*) "RESPUESTA:"
+	write(2,*) "RESULT:"
 	write(2,*) res
 	close(2)
 	!********** EXPORT TO CSV **********!
 
-	!********** READ FILE **********!				!####### DONE -------------->
+	!********** READ FILE **********!				!####### DONE --------------> !---------------> LAGRANGE!
 END SUBROUTINE lagrange
 
 SUBROUTINE newton()
@@ -610,7 +711,7 @@ SUBROUTINE newton()
 
 	diff(:,1) = y(:)
 
-	do j = 2,n
+	do j=2,n
 		do i=1, (n-j+1)
 			diff(i,j) = (diff(i + 1, j - 1) - diff(i, j - 1)) / (x(i + j - 1) - x(i));
 		enddo
@@ -639,9 +740,387 @@ SUBROUTINE newton()
 	write(2,*) "RESPUESTA:"
 	write(2,*) fin
 	close(2)
-	!********** EXPORT TO CSV **********!
-
-
+	!********** EXPORT TO CSV **********! !---------------> NEWTON DIVIDED DIFERENCES!
 END SUBROUTINE newton
 
-!********* FILE ************!
+!********** REGRESSION **********!
+
+!********** NUMERICAL INTEGRATION **********!
+
+SUBROUTINE trapezoid()
+
+	INTEGER:: op,lol
+	DOUBLE PRECISION:: upper_int, lower_int, diff,h,f,res
+	DOUBLE PRECISION, dimension (:), allocatable :: f_x
+	DOUBLE PRECISION, dimension (:), allocatable :: x
+
+	write (*,*) " ################# TRAPEZOID #################"
+
+	write (*,*) "WILL YOU BE USING SCATTERED DATA OR A FUNCTION ?"
+	write (*,*) "1) DATA"
+	write (*,*) "2) FUNCTION"
+
+	read(*,*)op
+
+	if (op == 1) then
+
+		open(unit = 10, file = "file.txt")
+		read(10,*)inters
+
+		allocate(x(inters))
+		allocate(f_x(inters))
+
+		do i=1,inters
+			read(10,*)x(i),f_x(i)
+			write(*,*)x(i),f_x(i)
+		enddo
+
+		close(10)
+
+		upper_int = x(inters)
+		lower_int = x(1)
+		diff = upper_int-lower_int
+		h = (diff)/inters
+
+		res = f_x(1) + f_x(inters)
+		lol = inters - 1
+		do i=2,lol
+				res = res + 2 * f_x(i)
+		end do
+
+		res = res * (h/2)
+		write(*,*) "RESULT = ", real(res)
+
+	else
+
+		CALL intervalos(lower_int,upper_int)
+		diff = upper_int-lower_int
+		write (*,*) "HOW MANY TRAPEZOIDS DO YOU WANT ?"
+		write (*,*) "TIP: SOMETIMES USING LARGER INTERVALS GIVE A BETTER RESULT"
+		read(*,*)inters
+		h = diff/inters
+		allocate( x(inters) )
+		allocate( f_x(inters) )
+		i = 0
+
+		res = f(lower_int) + f(upper_int)
+		lol = inters - 1
+		do i=1,lol
+				res = res + 2 * f(lower_int +i*h)
+		end do
+
+		res = res * (h/2)
+		write(*,*) "RESULT = ", real(res)
+
+	endif
+
+END SUBROUTINE trapezoid
+
+SUBROUTINE simpson1_3()
+
+	INTEGER:: op, inters, tol, i
+	DOUBLE PRECISION:: upper_int, lower_int, diff,h,f,res
+	DOUBLE PRECISION, dimension (:), allocatable :: f_x
+	DOUBLE PRECISION, dimension (:), allocatable :: x
+
+	write (*,*) " ################# SIMPSON 1/3 #################"
+
+	write (*,*) "WILL YOU BE USING SCATTERED DATA OR A FUNCTION ?"
+	write (*,*) "1) DATA"
+	write (*,*) "2) FUNCTION"
+
+	read(*,*)op
+
+	if (op == 1) then
+
+		open(unit = 10, file = "file.txt")
+		read(10,*)inters
+
+		allocate(x(inters))
+		allocate(f_x(inters))
+
+		do i=1,inters
+			read(10,*)x(i),f_x(i)
+			write(*,*)x(i),f_x(i)
+		enddo
+
+		close(10)
+
+		upper_int = x(inters)
+		lower_int = x(1)
+
+		diff = upper_int-lower_int
+		h = (diff)/inters
+
+		res = 0
+		DO i=1,inters
+			if (i==0 .OR. i==inters) then
+				res = res + f_x(i)
+			else if (MOD(i,2) /= 0) then
+				res = res + 4*f_x(i)
+			else
+				res = res + 2*f_x(i)
+			endif
+		END DO
+
+		res = res * (h/3)
+		write(*,*) "THE ANSWER IS = ", real(res)
+	else
+		CALL intervalos(lower_int,upper_int)
+		diff = upper_int-lower_int
+		write (*,*) "HOW MANY INTERVALS DO YOU WANT ?"
+		write (*,*) "TIP: SOMETIMES USING LARGER INTERVALS GIVE A BETTER RESULT"
+		read(*,*)inters
+		h = diff/inters
+		allocate( x(inters) )
+		allocate( f_x(inters) )
+		i = 0
+		! --  CREATE AN ARRAY WITH ALL THE VALUES OF X WE WILL EVALUATE -- !
+		DO i=1,inters
+			x(i) = lower_int + i*h
+		END DO
+		! --  CREATE AN ARRAY WITH THE EVALUATIONS OF THE VALUES OF X -- !
+		DO i=1,inters
+			f_x(i) = f(x(i))
+		END DO
+		res = 0
+		DO i=1,inters
+			if (i==0 .OR. i==inters) then ! -- SUM THE FIRST AND LAST TERMS --!
+				res = res + f_x(i)
+			else if (MOD(i,2) /= 0) then ! -- IF i IS NOT PAIR THE EVALUATION IS MULTIPLIED BY 4, ELSE IT IS MULT BY 2 --!
+				res = res + 4*f_x(i)
+			else
+				res = res + 2*f_x(i)
+			endif
+		END DO
+
+		res = res * (h/3)
+		write(*,*) "THE ANSWER IS = ", real(res)
+	endif
+
+END SUBROUTINE simpson1_3
+
+SUBROUTINE simpson3_8()
+	INTEGER:: op, inters, tol, i
+	DOUBLE PRECISION:: upper_int, lower_int, diff,h,f,res
+	DOUBLE PRECISION, dimension (:), allocatable :: f_x
+	DOUBLE PRECISION, dimension (:), allocatable :: x
+
+	write (*,*) " ################# SIMPSON 3/8 #################"
+
+	write (*,*) "WILL YOU BE USING SCATTERED DATA OR A FUNCTION ?"
+	write (*,*) "1) DATA"
+	write (*,*) "2) FUNCTION"
+
+	read(*,*)op
+
+	if (op == 1) then
+		open(unit = 10, file = "file.txt")
+		read(10,*)inters
+
+		allocate(x(inters))
+		allocate(f_x(inters))
+
+		do i=1,inters
+			read(10,*)x(i),f_x(i)
+			write(*,*)x(i),f_x(i)
+		enddo
+
+		close(10)
+
+		upper_int = x(inters)
+		lower_int = x(1)
+
+		diff = upper_int-lower_int
+		h = (diff)/inters
+
+		res = 0
+		DO i=1,inters
+			if (i==0 .OR. i==inters) then
+				res = res + f_x(i)
+			else if (MOD(i,3) == 0) then
+				res = res + 2*f_x(i)
+			else
+				res = res + 3*f_x(i)
+			endif
+		END DO
+
+		res = res * (3*h/8)
+		write(*,*) "THE ANSWER IS = ", real(res)
+
+	else
+		CALL intervalos(lower_int,upper_int)
+		diff = upper_int-lower_int
+		write (*,*) "HOW MANY INTERVALS DO YOU WANT ?"
+		write (*,*) "TIP: SOMETIMES USING LARGER INTERVALS GIVE A BETTER RESULT"
+		read(*,*)inters
+		h = diff/inters
+		allocate( x(inters) )
+		allocate( f_x(inters) )
+		i = 0
+		! --  CREATE AN ARRAY WITH ALL THE VALUES OF X WE WILL EVALUATE -- !
+		DO i=1,inters
+			x(i) = lower_int + (i*h)
+		END DO
+		! --  CREATE AN ARRAY WITH THE EVALUATIONS OF THE VALUES OF X -- !
+		DO i=1,inters
+			f_x(i) = f(x(i))
+		END DO
+
+		res = 0
+		DO i=1,inters
+			if (i==0 .OR. i==inters) then
+				res = res + f_x(i)
+			else if (MOD(i,3) == 0) then
+				res = res + 2*f_x(i)
+			else
+				res = res + 3*f_x(i)
+			endif
+		END DO
+
+		res = res * (3*h/8)
+		write(*,*) "THE ANSWER IS = ", real(res)
+	endif
+
+END SUBROUTINE simpson3_8
+
+!********** DIFFERENTIAL EQUATIONS **********!
+
+SUBROUTINE euler()
+
+	DOUBLE PRECISION:: y, initial_x, h, aprox_x,df
+
+	y = 0.00000
+	initial_x = 0.000000
+	h = 120
+	aprox_x = 120
+
+	write (*,*) " ################# EULER METHOD #################"
+
+	DO WHILE( initial_x < aprox_x)
+		write(*,*)  df(initial_x, y)
+		y = y + h * df(initial_x, y)
+		initial_x = initial_x + h
+	END DO
+
+	write(*,*) "X: ",initial_x, "Y:", y
+
+END SUBROUTINE euler
+
+SUBROUTINE mod_euler()
+
+	DOUBLE PRECISION:: y, initial_x, h, aprox_x,df,k1,k2
+
+	y = 0.000000
+	initial_x = 0.000000
+	h = 120
+	aprox_x = 120
+
+	write (*,*) " ################# MODIFIED EULER METHOD #################"
+
+	DO WHILE( initial_x < aprox_x)
+		!write(*,*) initial_x, y
+		k1 = df(initial_x,y)
+		k2 = df(initial_x+1, y+ (h*k1))
+		y = y + (h/2)*(k1+k2)
+		initial_x = initial_x + h
+	END DO
+
+	write(*,*) "X: ",initial_x, "Y:", y
+
+END SUBROUTINE mod_euler
+
+SUBROUTINE rk3()
+
+	DOUBLE PRECISION:: y, initial_x,initial_y, h, aprox_x,df,k1,k2,k3,n,n1
+	INTEGER::numinterval
+
+	initial_y = 0.000000
+	initial_x = 0.000000
+	numinterval = 120
+	aprox_x = 120
+	h = (aprox_x-initial_x)/numinterval
+	n1 = n+1
+
+	write(*,*)h
+
+	y = initial_y
+	write (*,*) " ################# RUNGE KUTTA 3rd ORDER #################"
+
+	do i = 1, numinterval
+		!write(*,*) initial_x, y
+		k1 = df(initial_x,y)
+		k2 = df( initial_x+(h/2), y+(h/2)*k1 )
+		k3 = df( (intial_x + h), y-k1*h+2*h*k2 )
+		!,yold-h*k1+2*h*k2
+		y = y + (h/6)*(k1+4*k2+k3)
+		!write(*,*)initial_x,y
+		initial_x = initial_x + h
+
+	END DO
+
+	write(*,*) "RES:", initial_x, y
+
+
+END SUBROUTINE rk3
+
+SUBROUTINE rk4()
+
+	DOUBLE PRECISION:: y, initial_x,initial_y, h, aprox_x,df,k1,k2,k3,k4,n,n1
+	INTEGER::numinterval
+
+	initial_y = 0.000000
+	initial_x = 0.000000
+	numinterval = 120
+	aprox_x = 120
+	h = (aprox_x-initial_x)/numinterval
+	n1 = n+1
+
+	y = initial_y
+	write (*,*) " ################# RUNGE KUTTA 4th ORDER #################"
+
+	do i = 1, numinterval
+		!write(*,*) initial_x, y
+		k1 = df(initial_x,y)
+		k2 = df( initial_x+(h/2), y+(h/2)*k1 )
+		k3 = df( initial_x+(h/2), y+(h/2)*k2 )
+		k4 = df( initial_x +h, y +k3*h)
+		!,yold-h*k1+2*h*k2
+		y = y + (h/6)*(k1+2*k2+2*k3+k4)
+		!write(*,*)initial_x,y
+		initial_x = initial_x + h
+
+	END DO
+
+	write(*,*) "RES:", initial_x, y
+
+END SUBROUTINE rk4
+
+!********** UTILS **********!
+
+SUBROUTINE intervalos(a,b)
+  IMPLICIT NONE
+  DOUBLE PRECISION :: a,b
+  print *,"Lower bound of the interval:"
+  read (*,*) a
+  print *,"Upper bound of the interval:"
+  read (*,*) b
+END SUBROUTINE intervalos
+
+DOUBLE PRECISION FUNCTION f(x)
+  IMPLICIT NONE
+  DOUBLE PRECISION :: x
+  f = (1/(1+ x*x))
+END FUNCTION f
+
+DOUBLE PRECISION FUNCTION f_prime(x)
+  IMPLICIT NONE
+  DOUBLE PRECISION :: x
+  f_prime = 2 - 6*x + 12*(x**2)
+END FUNCTION f_prime
+
+DOUBLE PRECISION FUNCTION df(x,y)
+  IMPLICIT NONE
+  DOUBLE PRECISION :: x,y
+  df = (10)/( (30000)*(  -(x**2)/(3600) + (x/30) + 1   ))
+END FUNCTION df
