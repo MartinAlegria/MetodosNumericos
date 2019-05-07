@@ -9,6 +9,8 @@ PROGRAM SECOND_PARTIAL
 	!CALL trapezoid()
 	CALL euler()
 	CALL mod_euler()
+	CALL rk3()
+	CALL rk4()
 
 END PROGRAM SECOND_PARTIAL
 
@@ -979,6 +981,71 @@ SUBROUTINE mod_euler()
 
 END SUBROUTINE mod_euler
 
+SUBROUTINE rk3()
+
+	DOUBLE PRECISION:: y, initial_x,initial_y, h, aprox_x,df,k1,k2,k3,n,n1
+	INTEGER::numinterval
+
+	initial_y = 0.000000
+	initial_x = 0.000000
+	numinterval = 120
+	aprox_x = 120
+	h = (aprox_x-initial_x)/numinterval
+	n1 = n+1
+
+	write(*,*)h
+
+	y = initial_y
+	write (*,*) " ################# RUNGE KUTTA 3rd ORDER #################"
+	
+	do i = 1, numinterval
+		!write(*,*) initial_x, y
+		k1 = df(initial_x,y)
+		k2 = df( initial_x+(h/2), y+(h/2)*k1 )
+		k3 = df( (intial_x + h), y-k1*h+2*h*k2 )
+		!,yold-h*k1+2*h*k2
+		y = y + (h/6)*(k1+4*k2+k3)
+		!write(*,*)initial_x,y
+		initial_x = initial_x + h
+
+	END DO
+
+	write(*,*) "RES:", initial_x, y
+
+
+END SUBROUTINE rk3
+
+SUBROUTINE rk4()
+
+	DOUBLE PRECISION:: y, initial_x,initial_y, h, aprox_x,df,k1,k2,k3,k4,n,n1
+	INTEGER::numinterval
+
+	initial_y = 0.000000
+	initial_x = 0.000000
+	numinterval = 120
+	aprox_x = 120
+	h = (aprox_x-initial_x)/numinterval
+	n1 = n+1
+
+	y = initial_y
+	write (*,*) " ################# RUNGE KUTTA 4th ORDER #################"
+	
+	do i = 1, numinterval
+		!write(*,*) initial_x, y
+		k1 = df(initial_x,y)
+		k2 = df( initial_x+(h/2), y+(h/2)*k1 )
+		k3 = df( initial_x+(h/2), y+(h/2)*k2 )
+		k4 = df( initial_x +h, y +k3*h)
+		!,yold-h*k1+2*h*k2
+		y = y + (h/6)*(k1+2*k2+2*k3+k4)
+		!write(*,*)initial_x,y
+		initial_x = initial_x + h
+
+	END DO
+
+	write(*,*) "RES:", initial_x, y
+
+END SUBROUTINE rk4
 
 !********** UTILS **********!
 
