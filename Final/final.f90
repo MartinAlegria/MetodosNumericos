@@ -4,13 +4,47 @@ PROGRAM SECOND_PARTIAL
 	INTEGER :: selection
 	CHARACTER::loop
 
+	write(*,*) " ############### NUMERICAL METHODS ###############"
+	write(*,*) " PLEASE BE SURE TO READ THE README.txt FILE BEFORE USING THE PRORGAM "
+	write(*,*) " WHAT DO YOU WANT TO SOLVE ? "
+	write(*,*) " 1.) NON LINEAR EQUATIONS"
+	write(*,*) " 2.) SYSTEMS OF LINEAR EQUATIONS"
+	write(*,*) " 3.) INTERPOLATION"
+	write(*,*) " 4.) REGRESSION"
+	write(*,*) " 5.) NUMERICAL INTEGRATION"
+	write(*,*) " 6.) ORDINARY DIFFERENTIAL EQUATIONS"
+
+	SELECT CASE(selection)
+		CASE(1) ! *********** NON LINEAR EQUATIONS!
+			
+
+		CASE(2)! ***********  SYSTEMS OF LINEAR EQUATIONS!
+			
+
+		CASE(3)! *********** INTERPOLATION!
+			
+
+		CASE(4)! *********** REGRESSION!
+			
+
+		CASE(5)! *********** NUMERICAL INTEGRATION!
+			
+
+		CASE(6)! *********** ORDINARY DIFFERENTIAL EQUATIONS!
+			
+
+	END SELECT
+
+
 	!CALL simpson1_3()
 	!CALL simpson3_8()
 	!CALL trapezoid()
-	CALL euler()
-	CALL mod_euler()
-	CALL rk3()
-	CALL rk4()
+	!CALL euler()
+	!CALL mod_euler()
+	!CALL rk3()
+	!CALL rk4()
+
+	write(*,*) "DO YOU WANT TO USE DATA OR "
 
 END PROGRAM SECOND_PARTIAL
 
