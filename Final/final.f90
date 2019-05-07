@@ -8,6 +8,7 @@ PROGRAM SECOND_PARTIAL
 	!CALL simpson3_8()
 	!CALL trapezoid()
 	CALL euler()
+	CALL mod_euler()
 
 END PROGRAM SECOND_PARTIAL
 
@@ -938,15 +939,15 @@ SUBROUTINE euler()
 
 	DOUBLE PRECISION:: y, initial_x, h, aprox_x,df
 
-	y = 1.000000
+	y = 0.000000
 	initial_x = 0.000000
-	h = 0.5
-	aprox_x = 1
+	h = 120
+	aprox_x = 120
 
 	write (*,*) " ################# EULER METHOD #################"
 
 	DO WHILE( initial_x < aprox_x)
-		!write(*,*) initial_x, y
+		write(*,*)  df(initial_x, y)
 		y = y + h * df(initial_x, y)
 		initial_x = initial_x + h
 	END DO
@@ -954,6 +955,29 @@ SUBROUTINE euler()
 	write(*,*) "X: ",initial_x, "Y:", y
 
 END SUBROUTINE euler
+
+SUBROUTINE mod_euler()
+
+	DOUBLE PRECISION:: y, initial_x, h, aprox_x,df,k1,k2
+
+	y = 0.000000
+	initial_x = 0.000000
+	h = 120
+	aprox_x = 120
+
+	write (*,*) " ################# MODIFIED EULER METHOD #################"
+
+	DO WHILE( initial_x < aprox_x)
+		!write(*,*) initial_x, y
+		k1 = df(initial_x,y)
+		k2 = df(initial_x+1, y+ (h*k1))
+		y = y + (h/2)*(k1+k2)
+		initial_x = initial_x + h
+	END DO
+
+	write(*,*) "X: ",initial_x, "Y:", y
+
+END SUBROUTINE mod_euler
 
 
 !********** UTILS **********!
@@ -982,7 +1006,7 @@ END FUNCTION f_prime
 DOUBLE PRECISION FUNCTION df(x,y)
   IMPLICIT NONE
   DOUBLE PRECISION :: x,y
-  df = (y/2)
+  df = (10)/( (30000)*(  -(x**2)/(3600) + (x/30) + 1   ))
 END FUNCTION df
 
 
