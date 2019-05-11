@@ -14,6 +14,8 @@ PROGRAM SECOND_PARTIAL
 	write(*,*) " 5.) NUMERICAL INTEGRATION"
 	write(*,*) " 6.) ORDINARY DIFFERENTIAL EQUATIONS"
 
+	read(*,*)selection
+
 	SELECT CASE(selection)
 		CASE(1) ! *********** NON LINEAR EQUATIONS!
 			Write(*,*) " WHAT METHOD DO YOU WANT TO USE ? "
@@ -45,6 +47,7 @@ PROGRAM SECOND_PARTIAL
 			write(*,*) " 1.) TRAPEZOID"
 			write(*,*) " 2.) SIMPSON 1/3"
 			write(*,*) " 3.) SIMPSON 3/8"
+			CALL simpson3_8()
 
 		CASE(6)! *********** ORDINARY DIFFERENTIAL EQUATIONS!
 
@@ -824,8 +827,9 @@ END SUBROUTINE trapezoid
 
 SUBROUTINE simpson1_3()
 
-	INTEGER:: op, inters, tol, i
-	DOUBLE PRECISION:: upper_int, lower_int, diff,h,f,res
+	INTEGER:: op, inters, i
+	DOUBLE PRECISION:: tol,orig,iters,upper_int, lower_int, diff,h,f,res, old, new, maxiters,c,c1,c2,err
+	LOGICAL:: converged
 	DOUBLE PRECISION, dimension (:), allocatable :: f_x
 	DOUBLE PRECISION, dimension (:), allocatable :: x
 
@@ -874,41 +878,47 @@ SUBROUTINE simpson1_3()
 	else
 		CALL intervalos(lower_int,upper_int)
 		diff = upper_int-lower_int
-		write (*,*) "HOW MANY INTERVALS DO YOU WANT ?"
-		write (*,*) "TIP: SOMETIMES USING LARGER INTERVALS GIVE A BETTER RESULT"
-		read(*,*)inters
+		converged = .FALSE.
+		inters = 2
 		h = diff/inters
-		allocate( x(inters) )
-		allocate( f_x(inters) )
-		i = 0
-		! --  CREATE AN ARRAY WITH ALL THE VALUES OF X WE WILL EVALUATE -- !
-		DO i=1,inters
-			x(i) = lower_int + i*h 
-		END DO 
-		! --  CREATE AN ARRAY WITH THE EVALUATIONS OF THE VALUES OF X -- !
-		DO i=1,inters
-			f_x(i) = f(x(i))
-		END DO
-		res = 0
-		DO i=1,inters
-			if (i==0 .OR. i==inters) then ! -- SUM THE FIRST AND LAST TERMS --!
-				res = res + f_x(i)
-			else if (MOD(i,2) /= 0) then ! -- IF i IS NOT PAIR THE EVALUATION IS MULTIPLIED BY 4, ELSE IT IS MULT BY 2 --!
-				res = res + 4*f_x(i)
-			else
-				res = res + 2*f_x(i)
-			endif
-		END DO
+		write (*,*) "HOW MANY ITERATIONS:"
+		read(*,*) maxiters
+		write (*,*) "TOLERANCE:"
+		read(*,*) tol
+		iters = 1
+		new = 0
+		orig = (h/3)*(f(lower_int)+4*f((upper_int+lower_int)/2)+f(upper_int))
+		old = orig
+		write(*,*) "INITIAL: ", orig
 
-		res = res * (h/3)
-		write(*,*) "THE ANSWER IS = ", real(res)
+		DO WHILE (converged .eqv. .FALSE. .and. iters < maxiters)
+			inters = inters +2
+			h = diff/inters
+			c = lower_int
+			do i = 1, inters/2
+				c1 = c+h
+				c2 = c+2*h
+				new = new + f(c)+4*f(c1) + f(c2)
+				c = c2
+			end do
+			new = (h/3)*new
+			err = abs((new-old)/new)
+			if (err <= tol) then
+				converged = .TRUE.
+			endif
+			iters = iters + 1
+			old = new
+			new = 0
+		END DO
+		write(*,*) "THE ANSWER IS = ", real(old)
 	endif
 
 END SUBROUTINE simpson1_3
 
 SUBROUTINE simpson3_8()
-	INTEGER:: op, inters, tol, i
-	DOUBLE PRECISION:: upper_int, lower_int, diff,h,f,res
+	INTEGER:: op, inters, i
+	DOUBLE PRECISION:: tol,orig,iters,upper_int, lower_int, diff,h,f,res, old, new, maxiters,c,c1,c2,c3,err
+	LOGICAL:: converged
 	DOUBLE PRECISION, dimension (:), allocatable :: f_x
 	DOUBLE PRECISION, dimension (:), allocatable :: x
 
@@ -957,35 +967,42 @@ SUBROUTINE simpson3_8()
 	else
 		CALL intervalos(lower_int,upper_int)
 		diff = upper_int-lower_int
-		write (*,*) "HOW MANY INTERVALS DO YOU WANT ?"
-		write (*,*) "TIP: SOMETIMES USING LARGER INTERVALS GIVE A BETTER RESULT"
-		read(*,*)inters
+		converged = .FALSE.
+		inters = 3
 		h = diff/inters
-		allocate( x(inters) )
-		allocate( f_x(inters) )
-		i = 0
-		! --  CREATE AN ARRAY WITH ALL THE VALUES OF X WE WILL EVALUATE -- !
-		DO i=1,inters
-			x(i) = lower_int + (i*h) 
-		END DO 
-		! --  CREATE AN ARRAY WITH THE EVALUATIONS OF THE VALUES OF X -- !
-		DO i=1,inters
-			f_x(i) = f(x(i))
-		END DO
-		
-		res = 0
-		DO i=1,inters
-			if (i==0 .OR. i==inters) then
-				res = res + f_x(i)
-			else if (MOD(i,3) == 0) then
-				res = res + 2*f_x(i)
-			else
-				res = res + 3*f_x(i)
+		write (*,*) "HOW MANY ITERATIONS:"
+		read(*,*) maxiters
+		write (*,*) "TOLERANCE:"
+		read(*,*) tol
+		iters = 1
+		new = 0
+		orig = (3*h/8)*(f(lower_int)+3*f((2*upper_int+lower_int)/3)+3*f((upper_int+2*lower_int)/3)+f(upper_int))
+		write(*,*) "INITIAL: ", orig
+		old = orig
+		write(*,*)iters, " ", maxiters
+		DO WHILE ((converged .eqv. .FALSE.) .and. (iters .lt. maxiters))
+			inters = inters +3
+			h = diff/inters
+			c = lower_int
+			do i = 1, inters/3
+				c1 = c+h
+				c2 = c+2*h
+				c3 = c+3*h
+				new = new +f(c)+3*f((2*c3+c)/3)+3*f((c3+2*c)/3)+f(c3)
+				c = c3
+			end do
+			new = (3*h/8)*new
+			err = abs((new-old)/new)
+			write(*,*) err
+			if (err <= tol) then
+				converged = .TRUE.
+				write(*,*) "CONVERGED"
 			endif
+			iters = iters + 1
+			old = new
+			new = 0
 		END DO
-
-		res = res * (3*h/8)
-		write(*,*) "THE ANSWER IS = ", real(res)
+		write(*,*) "THE ANSWER IS = ", real(old)
 	endif
 
 END SUBROUTINE simpson3_8
@@ -1024,7 +1041,7 @@ SUBROUTINE mod_euler()
 
 	write (*,*) " ################# MODIFIED EULER METHOD #################"
 
-	DO WHILE( initial_x < aprox_x)
+	DO WHILE( initial_x < aprox_x )
 		!write(*,*) initial_x, y
 		k1 = df(initial_x,y)
 		k2 = df(initial_x+1, y+ (h*k1))
