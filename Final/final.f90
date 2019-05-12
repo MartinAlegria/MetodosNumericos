@@ -4,6 +4,7 @@ PROGRAM SECOND_PARTIAL
 	INTEGER :: selection
 	CHARACTER::loop
 
+
 	write(*,*) " ############### NUMERICAL METHODS ###############"
 	write(*,*) " PLEASE BE SURE TO READ THE README.txt FILE BEFORE USING THE PRORGAM "
 	write(*,*) " WHAT DO YOU WANT TO SOLVE ? "
@@ -47,7 +48,6 @@ PROGRAM SECOND_PARTIAL
 			write(*,*) " 1.) TRAPEZOID"
 			write(*,*) " 2.) SIMPSON 1/3"
 			write(*,*) " 3.) SIMPSON 3/8"
-			CALL simpson3_8()
 
 		CASE(6)! *********** ORDINARY DIFFERENTIAL EQUATIONS!
 
@@ -56,19 +56,7 @@ PROGRAM SECOND_PARTIAL
 			write(*,*) " 2.) MODIFIED EULER"
 			write(*,*) " 3.) RANGE KUTTEN 3rd ORDER"
 			write(*,*) " 4.) RANGE KUTTEN 4th ORDER"
-
 	END SELECT
-
-
-	!CALL simpson1_3()
-	!CALL simpson3_8()
-	!CALL trapezoid()
-	!CALL euler()
-	!CALL mod_euler()
-	!CALL rk3()
-	!CALL rk4()
-
-	write(*,*) "DO YOU WANT TO USE DATA OR "
 
 END PROGRAM SECOND_PARTIAL
 
@@ -84,6 +72,7 @@ SUBROUTINE bisection()
   print *," #################### BISECTION ####################"
   CALL intervalos(a,b)
   
+  ! CHECA SI EL INTERVALO ES VALIDO
   DO WHILE (interval .EQV. .FALSE.)
      write(*,*) f(a)
      write(*,*) f(b)
@@ -102,6 +91,7 @@ SUBROUTINE bisection()
   print *, "Input the number of iterations"
   read (*,*) iters
 
+  !AQUI SE HACE EL METODO E ITERA
   DO
      c = (a+b)/2.0
      if(f(c) .GT. 0) then
@@ -110,6 +100,7 @@ SUBROUTINE bisection()
         a = c
      end if
 
+     !SI CONVERGE SE SALE
      if (abs(b-a) <= tol ) then
         write (*,*) "The result is: ", c
         write (*,*) "Iters:", start
@@ -135,17 +126,18 @@ SUBROUTINE false_position()
    print *," #################### FALSE POSITION METHOD ####################"
    CALL intervalos(a,b)
 
+	! CHECA SI EL INTERVALO ES VALIDO
    DO WHILE (interval .EQV. .FALSE.)
-   write(*,*) f(a)
-   write(*,*) f(b)
-   if((f(a)*f(b)) .LT. 0) then
-      print *,"Perfect!"
-      interval = .TRUE.
-   else
-      print *,"No interval, try again"
-      print *, "---------------------------------------"
-      CALL intervalos(a,b)
-   end if
+	   write(*,*) f(a)
+	   write(*,*) f(b)
+	   if((f(a)*f(b)) .LT. 0) then
+	      print *,"Perfect!"
+	      interval = .TRUE.
+	   else
+	      print *,"No interval, try again"
+	      print *, "---------------------------------------"
+	      CALL intervalos(a,b)
+	   end if
    END DO
 
    print *,"Input the tolerance"
@@ -153,6 +145,7 @@ SUBROUTINE false_position()
    print *, "Input the number of iterations"
    read (*,*) iters
 
+   ! EL METODO
    DO
    c=b-(f(b)*(b-a))/(f(b)-f(a))
    if(f(c) .GT. 0)then
@@ -161,6 +154,7 @@ SUBROUTINE false_position()
       a = c
    end if
 
+   !SI CONVERGE SE SALE
    if( abs(f(c)) <=  tol )then
       write (*,*) "The result is: ", c
       write (*,*) "Iters:", start
@@ -191,7 +185,7 @@ SUBROUTINE newton_raph()
    read (*,*) iters
    p = guess
    start = 0
-
+   !EL METODO
    DO
       write (*,*) "P: ", p
       write (*,*) "F(P):", f(p)
@@ -352,7 +346,7 @@ SUBROUTINE lu_decomp()
 	DOUBLE PRECISION, dimension (:), allocatable :: b
 	DOUBLE PRECISION :: temps
 
-	open(unit = 10, file = "system_eq.txt")
+	open(unit = 10, file = "third.csv")
 	read(10,*)n
 	n_1 = n+1
 	allocate ( matrix(n,n) )
@@ -620,6 +614,7 @@ SUBROUTINE power_series()
 		x(i) = (y(i) - temps)/um(i,i)
 	enddo
 
+	!EVALUA LA ECUACION
 	res = 0
 	do i=1,n
 		if (i /=1) then
@@ -904,6 +899,7 @@ SUBROUTINE simpson1_3()
 			new = (h/3)*new
 			err = abs((new-old)/new)
 			if (err <= tol) then
+				write(*,*) "CONVERGED --"
 				converged = .TRUE.
 			endif
 			iters = iters + 1
@@ -1011,19 +1007,35 @@ END SUBROUTINE simpson3_8
 
 SUBROUTINE euler()
 
-	DOUBLE PRECISION:: y, initial_x, h, aprox_x,df
+	DOUBLE PRECISION:: y, initial_x, h, aprox_x,df, old, new,errs,tol
+	LOGICAL:: converged
 
 	y = 0.00000
 	initial_x = 0.000000
-	h = 120
+	h = 1
 	aprox_x = 120
+	tol = 0.0
 
+	old = 0
 	write (*,*) " ################# EULER METHOD #################"
+	converged = .FALSE.
 
 	DO WHILE( initial_x < aprox_x)
 		write(*,*)  df(initial_x, y)
 		y = y + h * df(initial_x, y)
 		initial_x = initial_x + h
+
+		new = y
+		err = abs( (new-old)/new )
+		write(*,*) "ERR = ", err, " ---",tol
+
+		if (err <= tol) then
+			write(*,*) "CONVERGED"
+			converged = .TRUE.
+		endif
+
+		old = new
+
 	END DO
 
 	write(*,*) "X: ",initial_x, "Y:", y
@@ -1032,7 +1044,7 @@ END SUBROUTINE euler
 
 SUBROUTINE mod_euler()
 
-	DOUBLE PRECISION:: y, initial_x, h, aprox_x,df,k1,k2
+	DOUBLE PRECISION:: y, initial_x, h, aprox_x,df,k1,k2,tol
 
 	y = 0.000000
 	initial_x = 0.000000
@@ -1040,8 +1052,10 @@ SUBROUTINE mod_euler()
 	aprox_x = 120
 
 	write (*,*) " ################# MODIFIED EULER METHOD #################"
+	write (*,*) " GIVE ME THE TOLERANCE:"
+	read(*,*) tol
 
-	DO WHILE( initial_x < aprox_x )
+	DO WHILE( initial_x < aprox_x)
 		!write(*,*) initial_x, y
 		k1 = df(initial_x,y)
 		k2 = df(initial_x+1, y+ (h*k1))
@@ -1057,34 +1071,38 @@ SUBROUTINE rk3()
 
 	DOUBLE PRECISION:: y, initial_x,initial_y, h, aprox_x,df,k1,k2,k3,n,n1
 	INTEGER::numinterval
+	write (*,*) " ################# RUNGE KUTTA 3rd ORDER #################"
+	
+	write (*,*) " GIVE ME THE INITIAL Y "
+	read(*,*)initial_y
+	write (*,*) " GIVE ME THE INITIAL X "
+	read(*,*)initial_x
+	write (*,*) " GIVE ME THE H "
+	read(*,*)h
+	write (*,*) " GIVE ME THE APROX X "
+	read(*,*)aprox_x
 
-	initial_y = 0.000000
-	initial_x = 0.000000
-	numinterval = 120
-	aprox_x = 120
-	h = (aprox_x-initial_x)/numinterval
-	n1 = n+1
+	y = initial_y!NO QUITAR ESTO O SE
+	numinterval = (aprox_x - initial_x)/h
 
 	write(*,*)h
 
 	y = initial_y
-	write (*,*) " ################# RUNGE KUTTA 3rd ORDER #################"
-	
+
 	do i = 1, numinterval
 		!write(*,*) initial_x, y
 		k1 = df(initial_x,y)
 		k2 = df( initial_x+(h/2), y+(h/2)*k1 )
-		k3 = df( (intial_x + h), y-k1*h+2*h*k2 )
+		k3 = df( (initial_x + h), y-k1*h+2*h*k2 )
 		!,yold-h*k1+2*h*k2
 		y = y + (h/6)*(k1+4*k2+k3)
-		!write(*,*)initial_x,y
+		write(*,*)initial_x,y
 		initial_x = initial_x + h
 
 	END DO
 
 	write(*,*) "RES:", initial_x, y
-
-
+	
 END SUBROUTINE rk3
 
 SUBROUTINE rk4()
@@ -1092,16 +1110,22 @@ SUBROUTINE rk4()
 	DOUBLE PRECISION:: y, initial_x,initial_y, h, aprox_x,df,k1,k2,k3,k4,n,n1
 	INTEGER::numinterval
 
-	initial_y = 0.000000
-	initial_x = 0.000000
-	numinterval = 120
-	aprox_x = 120
-	h = (aprox_x-initial_x)/numinterval
-	n1 = n+1
 
-	y = initial_y
 	write (*,*) " ################# RUNGE KUTTA 4th ORDER #################"
-	
+	write (*,*) " GIVE ME THE INITIAL Y "
+	read(*,*)initial_y
+	write (*,*) " GIVE ME THE INITIAL X "
+	read(*,*)initial_x
+	write (*,*) " GIVE ME THE H "
+	read(*,*)h
+	write (*,*) " GIVE ME THE APROX X "
+	read(*,*)aprox_x
+
+	y = initial_y!NO QUITAR ESTO O SE
+
+	numinterval = (aprox_x-initial_x)/h
+	write(*,*)numinterval
+
 	do i = 1, numinterval
 		!write(*,*) initial_x, y
 		k1 = df(initial_x,y)
@@ -1133,19 +1157,19 @@ END SUBROUTINE intervalos
 DOUBLE PRECISION FUNCTION f(x)
   IMPLICIT NONE
   DOUBLE PRECISION :: x
-  f = (1/(1+ x*x))
+  f = (  1/SQRT(2*(4.D0*DATAN(1.D0))) * exp(-0.5*(x**2)))
 END FUNCTION f
 
 DOUBLE PRECISION FUNCTION f_prime(x)
   IMPLICIT NONE
   DOUBLE PRECISION :: x
-  f_prime = 2 - 6*x + 12*(x**2)
+  f_prime = 30194.50584*(x**2)+1.5
 END FUNCTION f_prime
 
 DOUBLE PRECISION FUNCTION df(x,y)
   IMPLICIT NONE
   DOUBLE PRECISION :: x,y
-  df = (10)/( (30000)*(  -(x**2)/(3600) + (x/30) + 1   ))
+  df = (-3200)/(2*(4.D0*DATAN(1.D0))*(x))
 END FUNCTION df
 
 
