@@ -744,7 +744,162 @@ SUBROUTINE newton()
 END SUBROUTINE newton
 
 !********** REGRESSION **********!
+SUBROUTINE ExponentialR()
 
+	!********** READ FILE **********!
+	INTEGER :: row,i,j,k,l,contpoint
+	DOUBLE PRECISION, dimension (:), allocatable :: y
+	DOUBLE PRECISION, dimension (:), allocatable :: x
+	DOUBLE PRECISION :: columns, ymed, st, sr, sumx, sumy, sumxy, sumx2
+
+	open(unit = 10, file = "file.txt")
+	read(10,*)row,columns
+	allocate ( y(row) )
+	allocate ( x(row) )
+
+	write(*,*) "************* Read Data *************"
+	do i=1,row
+		read(10,*)x(i),y(i)
+		write(*,*)x(i),y(i)
+	enddo
+
+	close(10)
+			ymed = 0
+			St = 0
+			Sr = 0
+
+			sumx = 0
+			sumy = 0
+			sumxy = 0
+			sumx2 = 0
+			do i = 1, row
+				sumx = sumx + x(i)
+				sumy = sumy + log(y(i))
+				sumx2 = sumx2 + x(i)**2
+				sumxy = sumxy + x(i)*log((y(i)))
+
+			end do
+
+			xmed = sumx/row
+			ymed = sumy/row
+			a1 = (row*sumxy-sumx*sumy)/(row*sumx2-sumx**2)
+			a0 = ymed - a1*xmed
+			print*, '        sumx                    sumy                    sumx2                    sumxy '
+			print*, sumx,sumy,sumx2,sumxy
+
+			print *, 'original values for '
+			print*, 'a0= ',a0,' a1 = ', a1
+			write (15,*) ' original values for a0 = ',a0,' a1 = ',a1
+			do i = 1, row
+				St = St + (log(y(i) - ymed)**2)
+				Sr = Sr + (log(y(i)) - a1*x(i) - a0)**2
+			end do
+			R2 = (St - Sr)/St
+			R = sqrt (R2)
+			Print *, '        Sr                    St                    R2                    R '
+			print*, Sr,St,R2,R
+			a0 = exp(a0)
+			Write (*,*) ' Values for the logarithmic equation: a0 = ',a0,' a1= ',a1
+			Write (*,*) 'So the equations is: ',a0,'*e',a1
+	!
+	! Evaluation of points
+	!
+		contpoint=1
+			Do while (contpoint == 1)
+				Print *, 'press 1 if you want to calculate the regression value for a point, 0 if not'
+				read *, contpoint
+				if (contpoint == 1) then
+					print *, 'what value do you want to calculate'
+					read *, xint
+					yint = a0*exp(a1*xint)
+					write (*,*) 'the value for x = ',xint, ' is ',yint
+					write (15,*) xint,yint
+				endif
+			end do
+END SUBROUTINE ExponentialR
+
+
+SUBROUTINE LogarithmicR()
+
+	!********** READ FILE **********!
+	INTEGER :: row,i,j,k,l,contpoint
+	DOUBLE PRECISION, dimension (:), allocatable :: y
+	DOUBLE PRECISION, dimension (:), allocatable :: x
+	DOUBLE PRECISION :: columns, ymed, st, sr, sumx, sumy, sumxy, sumx2
+
+	open(unit = 10, file = "file.txt")
+	read(10,*)row,columns
+	allocate ( y(row) )
+	allocate ( x(row) )
+
+	write(*,*) "************* Read Data *************"
+	do i=1,row
+		read(10,*)x(i),y(i)
+		write(*,*)x(i),y(i)
+	enddo
+
+	close(10)
+			ymed = 0
+			St = 0
+			Sr = 0
+
+			sumx = 0
+			sumy = 0
+			sumxy = 0
+			sumx2 = 0
+			do i = 1, row
+				sumx = sumx + log10(x(i))
+				sumy = sumy + log10(y(i))
+				sumx2 = sumx2 + log10(x(i))**2
+				sumxy = sumxy + log10(x(i))*log10((y(i)))
+
+			end do
+
+			xmed = sumx/row
+			ymed = sumy/row
+			a1 = (row*sumxy-sumx*sumy)/(row*sumx2-sumx**2)
+			a0 = ymed - a1*xmed
+
+			print*, '        log(sumx)                   log(sumy)                    log(sumx2)                  log(sumxy) '
+			print*, sumx,sumy,sumx2,sumxy
+
+			print *, 'original values for '
+			print*, 'log(a0)= ',10**a0,' a1 = ', a1
+			write (15,*) ' original values for a0 = ',10**a0,' a1 = ',a1
+			do i = 1, row
+				St = St + (log10(y(i) - ymed)**2)
+				Sr = Sr + (log10(y(i)-(a0+a1*log10(x(i)))**2))
+			end do
+
+			R2 = (St - Sr)/St
+			R = sqrt (R2)
+			Print *, '        Sr                    St                    R2                    R '
+			print*, Sr,St,R2,R
+			a0 = 10**a0
+			Write (*,*) ' Values for the logarithmic equation: a0 = ',a0,' a1= ',a1
+			Write (*,*) 'So the equations is: ',a0,'*e',a1
+			Write (*,*) 'Sr = ',Sr, ' St =  ',St, ' R2 = ',R2, ' R = ',R
+			Write (*,*) '           x              y'
+	!
+	! Evaluation of points
+	!
+		contpoint=1
+			Do while (contpoint == 1)
+				Print *, 'press 1 if you want to calculate the regression value for a point, 0 if not'
+				read *, contpoint
+				if (contpoint == 1) then
+					print *, 'what value do you want to calculate'
+					read *, xint
+					yint = a0*exp(a1*xint)
+					write (*,*) 'the value for x = ',xint, ' is ',yint
+					write (15,*) xint,yint
+				endif
+			end do
+END SUBROUTINE LogarithmicR
+
+SUBROUTINE PolynomialRegression()
+
+END SUBROUTINE PolynomialRegression
 !********** NUMERICAL INTEGRATION **********!
 
 SUBROUTINE trapezoid()
