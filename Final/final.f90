@@ -930,6 +930,7 @@ SUBROUTINE newton()
 	
 		fin = fin + y(1)
 		write(2,*) "X = ", r, " Y = ", fin
+		write(*,*) "X = ", r, " Y = ", fin
 		write(*,*) "DO YOU WANT TO TRY ANOTHER NUMBER ?:"
 		write(*,*) "1 == YES, 0 == NO"
 		read(*,*)choice
