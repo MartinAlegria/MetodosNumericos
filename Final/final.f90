@@ -888,7 +888,7 @@ SUBROUTINE newton()
 	read(*,*)file_write
 
 	open(unit = 10, file = file_read)
-	read(10,*)n,r
+	read(10,*)n
 	n_1 = n-1
 	allocate ( y(n) )
 	allocate ( x(n) )
