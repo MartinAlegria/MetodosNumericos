@@ -1268,6 +1268,8 @@ SUBROUTINE trapezoid()
 	DOUBLE PRECISION:: upper_int, lower_int, diff,h,f,res
 	DOUBLE PRECISION, dimension (:), allocatable :: f_x
 	DOUBLE PRECISION, dimension (:), allocatable :: x
+	character (len=20) :: file_read, file_write
+
 
 	write (*,*) " ################# TRAPEZOID #################"
 
@@ -1278,8 +1280,13 @@ SUBROUTINE trapezoid()
 	read(*,*)op
 
 	if (op == 1) then
-
-		open(unit = 10, file = "file.txt")
+		
+		write(*,*) "INPUT THE NAME OF THE FILE TO BE USED"
+		write(*,*) "*IMPORTANT!!!* REMEMBER THAT YOUR FILE HAS TO HAVE THE FORMAT GIVEN IN THE MANUAL"
+		read(*,*)file_read
+		write(*,*) "INPUT THE NAME OF THE FILE TO BE EXPORTED"
+		read(*,*)file_write
+		open(unit = 10, file = file_read)
 		read(10,*)inters
 
 		allocate(x(inters))
@@ -1302,12 +1309,15 @@ SUBROUTINE trapezoid()
 		do i=2,lol
 				res = res + 2 * f_x(i)
 		end do
-
+		open(unit = 10, file = file_write)
 		res = res * (h/2)	
 		write(*,*) "RESULT = ", real(res)
+		write(2,*) "RESULT = ", real(res)
+		close(2)
 
 	else
-
+		write(*,*) "INPUT THE NAME OF THE FILE TO BE EXPORTED"
+		read(*,*)file_write
 		CALL intervalos(lower_int,upper_int)
 		diff = upper_int-lower_int
 		write (*,*) "HOW MANY TRAPEZOIDS DO YOU WANT ?"
@@ -1323,9 +1333,12 @@ SUBROUTINE trapezoid()
 		do i=1,lol
 				res = res + 2 * f(lower_int +i*h)
 		end do
-
 		res = res * (h/2)	
+
+		open(unit = 10, file = file_write)
 		write(*,*) "RESULT = ", real(res)
+		write(2,*) "RESULT = ", real(res)
+		close(2)
 
 	endif
 
@@ -1338,6 +1351,7 @@ SUBROUTINE simpson1_3()
 	LOGICAL:: converged
 	DOUBLE PRECISION, dimension (:), allocatable :: f_x
 	DOUBLE PRECISION, dimension (:), allocatable :: x
+	character (len=20) :: file_read, file_write
 
 	write (*,*) " ################# SIMPSON 1/3 #################"
 
@@ -1349,7 +1363,12 @@ SUBROUTINE simpson1_3()
 
 	if (op == 1) then
 
-		open(unit = 10, file = "file.txt")
+		write(*,*) "INPUT THE NAME OF THE FILE TO BE USED"
+		write(*,*) "*IMPORTANT!!!* REMEMBER THAT YOUR FILE HAS TO HAVE THE FORMAT GIVEN IN THE MANUAL"
+		read(*,*)file_read
+		write(*,*) "INPUT THE NAME OF THE FILE TO BE EXPORTED"
+		read(*,*)file_write
+		open(unit = 10, file = file_read)
 		read(10,*)inters
 
 		allocate(x(inters))
@@ -1380,7 +1399,11 @@ SUBROUTINE simpson1_3()
 		END DO
 
 		res = res * (h/3)
+		open(unit = 10, file = file_write)
 		write(*,*) "THE ANSWER IS = ", real(res)
+		write(2,*) "THE ANSWER IS = ", real(res)
+		close(2)
+		
 	else
 		CALL intervalos(lower_int,upper_int)
 		diff = upper_int-lower_int
@@ -1417,7 +1440,10 @@ SUBROUTINE simpson1_3()
 			old = new
 			new = 0
 		END DO
+		open(unit = 10, file = file_write)
 		write(*,*) "THE ANSWER IS = ", real(old)
+		write(2,*) "THE ANSWER IS = ", real(old)
+		close(2)
 	endif
 
 END SUBROUTINE simpson1_3
@@ -1428,6 +1454,7 @@ SUBROUTINE simpson3_8()
 	LOGICAL:: converged
 	DOUBLE PRECISION, dimension (:), allocatable :: f_x
 	DOUBLE PRECISION, dimension (:), allocatable :: x
+	character (len=20) :: file_read, file_write
 
 	write (*,*) " ################# SIMPSON 3/8 #################"
 
@@ -1438,7 +1465,12 @@ SUBROUTINE simpson3_8()
 	read(*,*)op
 
 	if (op == 1) then
-		open(unit = 10, file = "file.txt")
+		write(*,*) "INPUT THE NAME OF THE FILE TO BE USED"
+		write(*,*) "*IMPORTANT!!!* REMEMBER THAT YOUR FILE HAS TO HAVE THE FORMAT GIVEN IN THE MANUAL"
+		read(*,*)file_read
+		write(*,*) "INPUT THE NAME OF THE FILE TO BE EXPORTED"
+		read(*,*)file_write
+		open(unit = 10, file = file_read)
 		read(10,*)inters
 
 		allocate(x(inters))
@@ -1469,7 +1501,10 @@ SUBROUTINE simpson3_8()
 		END DO
 
 		res = res * (3*h/8)
+		open(unit = 10, file = file_write)
 		write(*,*) "THE ANSWER IS = ", real(res)
+		write(2,*) "THE ANSWER IS = ", real(res)
+		close(2)
 
 	else
 		CALL intervalos(lower_int,upper_int)
@@ -1509,7 +1544,10 @@ SUBROUTINE simpson3_8()
 			old = new
 			new = 0
 		END DO
+		open(unit = 10, file = file_write)
 		write(*,*) "THE ANSWER IS = ", real(old)
+		write(2,*) "THE ANSWER IS = ", real(old)
+		close(2)
 	endif
 
 END SUBROUTINE simpson3_8
