@@ -872,13 +872,22 @@ END SUBROUTINE lagrange
 SUBROUTINE newton()
 
 	!********** READ FILE **********!
-	INTEGER :: n,n_1,i,j,k,l 
+	INTEGER :: n,n_1,i,j,k,l,choice
 	DOUBLE PRECISION, dimension (:), allocatable :: y
 	DOUBLE PRECISION, dimension (:), allocatable :: x
 	DOUBLE PRECISION, dimension (:,:), allocatable :: diff
 	DOUBLE PRECISION :: temp, fin,r
+	character (len=20) :: file_read, file_write
 
-	open(unit = 10, file = "interpolation.txt")
+	write (*,*) " ################# NEWTON DIVIDED DIFFERENCES #################"
+
+	write(*,*) "INPUT THE NAME OF THE FILE TO BE USED"
+	write(*,*) "*IMPORTANT!!!* REMEMBER THAT YOUR FILE HAS TO HAVE THE FORMAT GIVEN IN THE MANUAL"
+	read(*,*)file_read
+	write(*,*) "INPUT THE NAME OF THE FILE TO BE EXPORTED"
+	read(*,*)file_write
+
+	open(unit = 10, file = file_read)
 	read(10,*)n,r
 	n_1 = n-1
 	allocate ( y(n) )
@@ -890,7 +899,6 @@ SUBROUTINE newton()
 		read(10,*)x(i),y(i)
 		write(*,*)x(i),y(i)
 	enddo
-	write(*,*) "************* Number to interpolate: ", r
 
 	close(10)
 
@@ -902,28 +910,37 @@ SUBROUTINE newton()
 		enddo
 	enddo
 
+	open (unit = 2, file = file_write)
 
-	temp = 1
-	fin = 0
 
-	do i=2,n
-		do j=1,i-1
-			temp = temp*(r-x(j))
+	choice = 1
+	do while (choice == 1)
+		
+		write(*,*) "WHICH NUMBER DO YOU WANT TO INTERPOLATE:"
+		read(*,*)r 
+		temp = 1
+		fin = 0
+	
+		do i=2,n
+			do j=1,i-1
+				temp = temp*(r-x(j))
+			enddo
+			fin = fin + temp*diff(1,i)
 		enddo
-		fin = fin + temp*diff(1,i)
-	enddo
+	
+		fin = fin + y(1)
+		write(2,*) "X = ", r, " Y = ", fin
+		write(*,*) "DO YOU WANT TO TRY ANOTHER NUMBER ?:"
+		write(*,*) "1 == YES, 0 == NO"
+		read(*,*)choice
 
-	fin = fin + y(1)
-	write(*,*) "************* RESULTS EXPORTED TO CSV ************* "
+	end do
 
 	!********** EXPORT TO CSV **********!
-	open (unit = 2, file = "newton_div_diff.csv")
 	write(2,*)"DIVIDED DIFFERENCES"
 	do i=1, n
 		write(2,*) ( diff(i,j),"," ,j=2,n)
 	enddo
-	write(2,*) "RESPUESTA:"
-	write(2,*) fin
 	close(2)
 	!********** EXPORT TO CSV **********! !---------------> NEWTON DIVIDED DIFERENCES!
 END SUBROUTINE newton
